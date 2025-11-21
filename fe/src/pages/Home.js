@@ -10,7 +10,7 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const API_BASE_URL = "http://127.0.0.1:8000/api";
+  const API_BASE_URL = "http://api.thanhdanhluxury.vn/api";
 
   // Data tin tức (Giữ nguyên)
   const news = [

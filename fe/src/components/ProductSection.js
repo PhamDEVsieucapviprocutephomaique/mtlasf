@@ -45,7 +45,7 @@ const ProductSection = ({ group, isLast, isAdmin, onDeleteProduct }) => {
               onClick={() => setIsExpanded(!isExpanded)}
               className="flex items-center bg-blue-800 hover:bg-blue-900 text-white px-4 py-2 rounded transition duration-300"
             >
-              <span className="mr-2">{isExpanded ? "⬆️" : "📂"}</span>
+              <span className="mr-2">{isExpanded ? "" : ""}</span>
               {isExpanded ? "Thu gọn" : `Xem tất cả (${group.count})`}
             </button>
           )}
@@ -74,10 +74,13 @@ const ProductSection = ({ group, isLast, isAdmin, onDeleteProduct }) => {
                   className="cursor-pointer"
                   onClick={() => handleProductClick(product)}
                 >
-                  <div
-                    className="h-40 bg-cover bg-center rounded mb-3"
-                    style={{ backgroundImage: `url(${product.image})` }}
-                  ></div>
+                  <div className="h-48 bg-gray-100 overflow-hidden flex items-center justify-center">
+                    <img
+                      src={product.image}
+                      alt={product.name}
+                      className="max-w-full max-h-full object-scale-down p-2"
+                    />
+                  </div>
 
                   <div className="text-center">
                     <h3 className="font-bold text-lg text-gray-800 group-hover:text-blue-800 transition duration-300 mb-2">

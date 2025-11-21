@@ -114,16 +114,22 @@ const Admin = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
 
+  // State cho upload ảnh
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  const [previewUrls, setPreviewUrls] = useState([]);
+  const [isUploading, setIsUploading] = useState(false);
+  const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
+
   const [newProduct, setNewProduct] = useState({
     name: "",
     category_id: "",
     brand_id: "",
     price: "",
     description: "",
-    images: ["https://picsum.photos/300/200?random=" + Math.random()],
+    images: [],
   });
 
-  const API_BASE_URL = "http://127.0.0.1:8000/api";
+  const API_BASE_URL = "http://api.thanhdanhluxury.vn/api";
 
   // Kiểm tra trạng thái đăng nhập khi component mount
   useEffect(() => {
@@ -137,7 +143,6 @@ const Admin = () => {
     if (loginForm.username === "admin" && loginForm.password === "0969745670") {
       setIsLoggedIn(true);
       setLoginError("");
-      // Lưu trạng thái đăng nhập vào localStorage
       localStorage.setItem("adminLoggedIn", "true");
     } else {
       setLoginError("Tài khoản hoặc mật khẩu không đúng!");
@@ -213,8 +218,116 @@ const Admin = () => {
     }
   };
 
+  // ===== XỬ LÝ CHỌN ẢNH =====
+  const handleFileSelect = (e) => {
+    const files = Array.from(e.target.files);
+
+    // Giới hạn 10 ảnh
+    if (files.length > 10) {
+      alert("Chỉ được chọn tối đa 10 ảnh!");
+      return;
+    }
+
+    // Kiểm tra file ảnh
+    const validFiles = files.filter((file) => file.type.startsWith("image/"));
+    if (validFiles.length !== files.length) {
+      alert("Chỉ được chọn file ảnh!");
+      return;
+    }
+
+    setSelectedFiles(validFiles);
+
+    // Tạo preview
+    const previews = validFiles.map((file) => URL.createObjectURL(file));
+    setPreviewUrls(previews);
+  };
+
+  // ===== XỬ LÝ XÓA ẢNH PREVIEW =====
+  const handleRemovePreview = (index) => {
+    const newFiles = selectedFiles.filter((_, i) => i !== index);
+    const newPreviews = previewUrls.filter((_, i) => i !== index);
+
+    // Revoke URL để tránh memory leak
+    URL.revokeObjectURL(previewUrls[index]);
+
+    setSelectedFiles(newFiles);
+    setPreviewUrls(newPreviews);
+  };
+
+  // ===== UPLOAD ẢNH LÊN SERVER =====
+  const handleUploadImages = async () => {
+    if (selectedFiles.length === 0) {
+      alert("Vui lòng chọn ảnh trước khi upload!");
+      return;
+    }
+
+    setIsUploading(true);
+
+    try {
+      const formData = new FormData();
+      selectedFiles.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      const response = await fetch(`${API_BASE_URL}/upload/multiple`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        const result = await response.json();
+
+        if (result.success) {
+          const urls = result.uploaded.map((item) => item.url);
+          setUploadedImageUrls(urls);
+
+          // Cập nhật vào newProduct
+          setNewProduct((prev) => ({
+            ...prev,
+            images: urls,
+          }));
+
+          alert(`✅ Upload thành công ${result.total_uploaded} ảnh!`);
+
+          // Clear preview
+          previewUrls.forEach((url) => URL.revokeObjectURL(url));
+          setSelectedFiles([]);
+          setPreviewUrls([]);
+        } else {
+          alert(
+            "❌ Upload thất bại: " +
+              (result.errors ? result.errors.join(", ") : "Unknown error")
+          );
+        }
+      } else {
+        const error = await response.json();
+        alert("❌ Lỗi upload: " + (error.detail || "Không thể upload"));
+      }
+    } catch (error) {
+      console.error("Lỗi khi upload ảnh:", error);
+      alert("❌ Lỗi kết nối khi upload ảnh!");
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
+  // ===== XÓA ẢNH ĐÃ UPLOAD =====
+  const handleRemoveUploadedImage = (index) => {
+    const newUrls = uploadedImageUrls.filter((_, i) => i !== index);
+    setUploadedImageUrls(newUrls);
+    setNewProduct((prev) => ({
+      ...prev,
+      images: newUrls,
+    }));
+  };
+
   const handleAddProduct = async (e) => {
     e.preventDefault();
+
+    if (uploadedImageUrls.length === 0) {
+      alert("Vui lòng upload ít nhất 1 ảnh cho sản phẩm!");
+      return;
+    }
 
     const productData = {
       name: newProduct.name,
@@ -222,15 +335,16 @@ const Admin = () => {
       category_id: parseInt(newProduct.category_id),
       price: parseFloat(newProduct.price),
       description: newProduct.description,
-      images: [`https://picsum.photos/300/200?random=${Math.random()}`],
+      images: uploadedImageUrls,
     };
 
     if (
       !productData.brand_id ||
       !productData.category_id ||
-      isNaN(productData.price)
+      isNaN(productData.price) ||
+      productData.price <= 0
     ) {
-      alert("Vui lòng chọn Hãng, Loại và nhập Giá hợp lệ.");
+      alert("Vui lòng điền đầy đủ thông tin hợp lệ (Hãng, Loại, Giá > 0).");
       return;
     }
 
@@ -243,24 +357,29 @@ const Admin = () => {
 
       if (response.ok) {
         const result = await response.json();
-        alert(`Thêm sản phẩm "${result.name}" thành công!`);
+        alert(`✅ Thêm sản phẩm "${result.name}" thành công!`);
+
+        // Reset form
         setNewProduct({
           name: "",
           category_id: categories.length > 0 ? categories[0].id : "",
           brand_id: brands.length > 0 ? brands[0].id : "",
           price: "",
           description: "",
-          images: [`https://picsum.photos/300/200?random=${Math.random()}`],
+          images: [],
         });
+        setUploadedImageUrls([]);
+        setSelectedFiles([]);
+        setPreviewUrls([]);
       } else {
         const error = await response.json();
         alert(
-          "Lỗi khi thêm sản phẩm: " + JSON.stringify(error.detail || error)
+          "❌ Lỗi khi thêm sản phẩm: " + JSON.stringify(error.detail || error)
         );
       }
     } catch (error) {
       console.error("Lỗi khi thêm sản phẩm:", error);
-      alert("Lỗi khi thêm sản phẩm!");
+      alert("❌ Lỗi khi thêm sản phẩm!");
     }
   };
 
@@ -331,29 +450,23 @@ const Admin = () => {
   }
 
   return (
-    <div className="pt-20 py-6 min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50 pt-28 md:pt-32 pb-6">
       <div className="container mx-auto px-4 max-w-6xl">
-        {/* Header với nút đăng xuất */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-center text-blue-800"></h1>
-          <br></br>
-          <br></br>
-          <br></br>
-          <br></br>
-          <br></br>
-          <br></br>
+        {/* Header với nút đăng xuất - SỬA LẠI PHẦN NÀY */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold text-blue-800"></h1>
           <button
             onClick={handleLogout}
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition font-semibold"
+            className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg transition font-semibold w-full sm:w-auto text-base"
           >
             Đăng xuất
           </button>
         </div>
 
-        {/* Tabs */}
+        {/* Tabs - SỬA CHO RESPONSIVE */}
         <div className="flex border-b mb-4 bg-white shadow-sm rounded-t-lg overflow-hidden">
           <button
-            className={`px-5 py-2 font-medium transition ${
+            className={`px-4 py-4 font-medium transition flex-1 text-sm sm:text-base ${
               activeTab === "add-product"
                 ? "border-b-4 border-blue-800 text-blue-800 bg-gray-50"
                 : "text-gray-600 hover:bg-gray-100"
@@ -363,7 +476,7 @@ const Admin = () => {
             Thêm Sản Phẩm
           </button>
           <button
-            className={`px-5 py-2 font-medium transition ${
+            className={`px-4 py-4 font-medium transition flex-1 text-sm sm:text-base ${
               activeTab === "orders"
                 ? "border-b-4 border-blue-800 text-blue-800 bg-gray-50"
                 : "text-gray-600 hover:bg-gray-100"
@@ -380,7 +493,7 @@ const Admin = () => {
             <h2 className="text-xl font-bold mb-4 text-center text-gray-700">
               Thêm Sản Phẩm Mới
             </h2>
-            <div className="bg-white p-6 rounded-lg shadow-lg border">
+            <div className="bg-white p-4 sm:p-6 rounded-lg shadow-lg border">
               <form onSubmit={handleAddProduct}>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
@@ -393,13 +506,13 @@ const Admin = () => {
                       value={newProduct.name}
                       onChange={handleInputChange}
                       required
-                      className="w-full p-2 border rounded-lg outline-none focus:border-blue-800"
+                      className="w-full p-3 border rounded-lg outline-none focus:border-blue-800 text-sm sm:text-base"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium mb-1">
-                      Giá *
+                      Giá (VNĐ) *
                     </label>
                     <input
                       type="number"
@@ -408,8 +521,9 @@ const Admin = () => {
                       onChange={handleInputChange}
                       required
                       min="0"
-                      step="1000"
-                      className="w-full p-2 border rounded-lg outline-none focus:border-blue-800"
+                      step="any"
+                      placeholder="Nhập giá bất kỳ"
+                      className="w-full p-3 border rounded-lg outline-none focus:border-blue-800 text-sm sm:text-base"
                     />
                   </div>
 
@@ -422,7 +536,7 @@ const Admin = () => {
                       value={newProduct.category_id}
                       onChange={handleInputChange}
                       required
-                      className="w-full p-2 border rounded-lg outline-none focus:border-blue-800"
+                      className="w-full p-3 border rounded-lg outline-none focus:border-blue-800 text-sm sm:text-base"
                     >
                       <option value="">Chọn loại</option>
                       {categories.map((cat) => (
@@ -442,7 +556,7 @@ const Admin = () => {
                       value={newProduct.brand_id}
                       onChange={handleInputChange}
                       required
-                      className="w-full p-2 border rounded-lg outline-none focus:border-blue-800"
+                      className="w-full p-3 border rounded-lg outline-none focus:border-blue-800 text-sm sm:text-base"
                     >
                       <option value="">Chọn hãng</option>
                       {brands.map((brand) => (
@@ -464,13 +578,93 @@ const Admin = () => {
                     onChange={handleInputChange}
                     required
                     rows="3"
-                    className="w-full p-2 border rounded-lg outline-none focus:border-blue-800"
+                    className="w-full p-3 border rounded-lg outline-none focus:border-blue-800 text-sm sm:text-base"
                   />
+                </div>
+
+                {/* PHẦN UPLOAD ẢNH */}
+                <div className="mb-4 p-4 border-2 border-dashed border-gray-300 rounded-lg">
+                  <label className="block text-sm font-medium mb-2">
+                    Ảnh sản phẩm * (Tối đa 10 ảnh)
+                  </label>
+
+                  {/* Input chọn file */}
+                  <input
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    onChange={handleFileSelect}
+                    className="w-full p-2 border rounded-lg mb-2 text-sm"
+                  />
+
+                  {/* Preview ảnh đã chọn */}
+                  {previewUrls.length > 0 && (
+                    <div className="mb-3">
+                      <p className="text-sm font-medium mb-2">
+                        Preview ({previewUrls.length} ảnh):
+                      </p>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {previewUrls.map((url, index) => (
+                          <div key={index} className="relative">
+                            <img
+                              src={url}
+                              alt={`Preview ${index + 1}`}
+                              className="w-full h-20 object-cover rounded"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemovePreview(index)}
+                              className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                      <button
+                        type="button"
+                        onClick={handleUploadImages}
+                        disabled={isUploading}
+                        className="mt-2 w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white py-3 rounded-lg transition font-semibold text-sm sm:text-base"
+                      >
+                        {isUploading
+                          ? "Đang upload..."
+                          : "Upload ảnh lên server"}
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Hiển thị ảnh đã upload */}
+                  {uploadedImageUrls.length > 0 && (
+                    <div>
+                      <p className="text-sm font-medium mb-2 text-green-600">
+                        ✅ Đã upload {uploadedImageUrls.length} ảnh:
+                      </p>
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        {uploadedImageUrls.map((url, index) => (
+                          <div key={index} className="relative">
+                            <img
+                              src={url}
+                              alt={`Uploaded ${index + 1}`}
+                              className="w-full h-20 object-cover rounded border-2 border-green-500"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveUploadedImage(index)}
+                              className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-blue-800 text-white py-2 rounded-lg hover:bg-blue-900 transition font-semibold"
+                  className="w-full bg-blue-800 text-white py-3 rounded-lg hover:bg-blue-900 transition font-semibold text-sm sm:text-base"
                 >
                   Thêm Sản Phẩm
                 </button>
@@ -532,7 +726,7 @@ const Admin = () => {
                         <td className="px-4 py-3 text-center">
                           <button
                             onClick={() => handleViewOrderDetails(order)}
-                            className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded transition"
+                            className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-2 rounded transition"
                           >
                             Chi tiết
                           </button>

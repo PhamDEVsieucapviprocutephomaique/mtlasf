@@ -27,9 +27,7 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg">Địa chỉ</h3>
-                  <p className="text-gray-600">
-                    Học viện Công nghệ Bưu chính Viễn thông, Hà Nội
-                  </p>
+                  <p className="text-gray-600">Học asfdjsfajsfahsdkfjnaf</p>
                 </div>
               </div>
 

@@ -11,7 +11,7 @@ const CartView = ({ isOpen, onClose }) => {
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const API_BASE_URL = "http://127.0.0.1:8000/api";
+  const API_BASE_URL = "http://api.thanhdanhluxury.vn/api";
 
   useEffect(() => {
     if (isOpen) {
@@ -134,36 +134,36 @@ const CartView = ({ isOpen, onClose }) => {
     const itemTotal = itemPrice * item.quantity;
 
     return (
-      <div className="flex justify-between items-start py-3 px-3 bg-white border border-gray-200 rounded-lg mb-3">
-        <div className="flex items-center space-x-3 flex-grow">
+      <div className="flex justify-between items-start py-4 px-4 bg-white border border-gray-200 rounded-lg mb-4">
+        <div className="flex items-center space-x-4 flex-grow">
           <img
             src={item.image}
             alt={item.name}
-            className="w-14 h-14 object-cover rounded flex-shrink-0"
+            className="w-16 h-16 object-cover rounded flex-shrink-0"
           />
 
           <div className="flex-grow min-w-0">
-            <h4 className="font-semibold text-gray-800 text-sm line-clamp-2">
+            <h4 className="font-semibold text-gray-800 text-base line-clamp-2">
               {item.name}
             </h4>
-            <p className="text-xs text-gray-500">Hãng: {item.brand}</p>
-            <p className="text-xs text-red-600 font-bold mt-1">
+            <p className="text-sm text-gray-500">Hãng: {item.brand}</p>
+            <p className="text-sm text-red-600 font-bold mt-1">
               {itemPrice.toLocaleString("vi-VN")} VNĐ
             </p>
 
-            <div className="flex items-center space-x-1 mt-2">
+            <div className="flex items-center space-x-2 mt-3">
               <button
                 onClick={() => handleDecreaseQuantity(item.id)}
-                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-5 h-5 rounded transition text-xs"
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-7 h-7 rounded transition text-sm"
               >
                 −
               </button>
-              <span className="text-blue-600 font-bold w-5 text-center text-xs">
+              <span className="text-blue-600 font-bold w-8 text-center text-base">
                 {item.quantity}
               </span>
               <button
                 onClick={() => handleIncreaseQuantity(item.id)}
-                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-5 h-5 rounded transition text-xs"
+                className="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold w-7 h-7 rounded transition text-sm"
               >
                 +
               </button>
@@ -171,13 +171,13 @@ const CartView = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        <div className="flex flex-col items-end ml-2 flex-shrink-0">
-          <p className="text-xs text-red-600 font-bold">
+        <div className="flex flex-col items-end ml-3 flex-shrink-0">
+          <p className="text-sm text-red-600 font-bold">
             {itemTotal.toLocaleString("vi-VN")} VNĐ
           </p>
           <button
             onClick={() => handleRemove(item.id)}
-            className="text-red-500 hover:text-red-700 text-lg font-bold mt-1"
+            className="text-red-500 hover:text-red-700 text-xl font-bold mt-2"
             title="Xóa sản phẩm"
           >
             ✕
@@ -190,20 +190,20 @@ const CartView = ({ isOpen, onClose }) => {
   const totalPrice = calculateTotal();
 
   return (
-    <div className="fixed inset-0 z-40 flex justify-end">
+    <div className="fixed inset-0 z-50 flex justify-end">
       <div
         className="absolute inset-0 bg-black bg-opacity-50"
         onClick={onClose}
       ></div>
 
-      <div className="relative w-full max-w-lg bg-white shadow-2xl overflow-hidden flex flex-col">
-        <div className="p-4 border-b flex justify-between items-center bg-white flex-shrink-0">
-          <h3 className="text-xl font-bold text-blue-800">
+      <div className="relative w-full max-w-lg bg-white shadow-2xl overflow-hidden flex flex-col mt-16">
+        <div className="p-5 border-b flex justify-between items-center bg-white flex-shrink-0">
+          <h3 className="text-2xl font-bold text-blue-800">
             🛒 Giỏ Hàng ({localCartItems.length})
           </h3>
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-900 text-3xl font-light leading-none w-8 h-8 flex items-center justify-center"
+            className="text-gray-500 hover:text-gray-900 text-3xl font-light leading-none w-10 h-10 flex items-center justify-center"
             title="Đóng giỏ hàng"
           >
             ✕
@@ -212,9 +212,9 @@ const CartView = ({ isOpen, onClose }) => {
 
         {!showConsultForm ? (
           <>
-            <div className="flex-grow overflow-y-auto p-4">
+            <div className="flex-grow overflow-y-auto p-5">
               {localCartItems.length === 0 ? (
-                <p className="text-center text-gray-500 py-8">
+                <p className="text-center text-gray-500 py-10 text-lg">
                   Giỏ hàng của bạn hiện đang trống.
                 </p>
               ) : (
@@ -226,38 +226,41 @@ const CartView = ({ isOpen, onClose }) => {
               )}
             </div>
 
-            <div className="p-4 border-t bg-gray-50 flex-shrink-0">
-              <div className="bg-blue-50 p-3 rounded-lg mb-3">
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm text-gray-700">Số sản phẩm:</span>
-                  <span className="font-bold text-gray-800">
+            <div className="p-5 border-t bg-gray-50 flex-shrink-0">
+              <div className="bg-blue-50 p-4 rounded-lg mb-4">
+                <div className="flex justify-between mb-3">
+                  <span className="text-base text-gray-700">Số sản phẩm:</span>
+                  <span className="font-bold text-gray-800 text-base">
                     {localCartItems.length}
                   </span>
                 </div>
-                <div className="flex justify-between mb-2">
-                  <span className="text-sm text-gray-700">Tổng số lượng:</span>
-                  <span className="font-bold text-gray-800">
+                <div className="flex justify-between mb-3">
+                  <span className="text-base text-gray-700">
+                    Tổng số lượng:
+                  </span>
+                  <span className="font-bold text-gray-800 text-base">
                     {totalQuantity}
                   </span>
                 </div>
-                <div className="border-t pt-2 flex justify-between">
-                  <span className="font-bold text-gray-800">Tổng tiền:</span>
-                  <span className="font-bold text-lg text-red-600">
+                <div className="border-t pt-3 flex justify-between">
+                  <span className="font-bold text-gray-800 text-lg">
+                    Tổng tiền:
+                  </span>
+                  <span className="font-bold text-xl text-red-600">
                     {totalPrice.toLocaleString("vi-VN")} VNĐ
                   </span>
                 </div>
               </div>
 
-              {/* Thay đổi nút tư vấn thành link gọi điện */}
-              <a
-                href="tel:0969745670"
-                className="block w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded transition duration-200 mb-2 text-center"
+              <button
+                onClick={() => setShowConsultForm(true)}
+                className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-lg transition duration-200 mb-3 text-center text-lg"
               >
                 TƯ VẤN NGAY VỀ ĐƠN HÀNG
-              </a>
+              </button>
               <button
                 onClick={onClose}
-                className="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 rounded transition duration-200"
+                className="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 rounded-lg transition duration-200 text-lg"
               >
                 Tiếp tục mua hàng
               </button>
@@ -267,15 +270,15 @@ const CartView = ({ isOpen, onClose }) => {
           <>
             <form
               onSubmit={handleSubmitOrder}
-              className="flex-grow overflow-y-auto p-4"
+              className="flex-grow overflow-y-auto p-5"
             >
-              <h3 className="text-lg font-bold text-blue-800 mb-4">
-                📋 Thông tin đặt hàng
+              <h3 className="text-xl font-bold text-blue-800 mb-5">
+                Thông tin đặt hàng
               </h3>
 
-              <div className="space-y-3 mb-4">
+              <div className="space-y-4 mb-5">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-base font-medium text-gray-700 mb-2">
                     Tên khách hàng *
                   </label>
                   <input
@@ -284,13 +287,13 @@ const CartView = ({ isOpen, onClose }) => {
                     value={formData.name}
                     onChange={handleFormChange}
                     placeholder="Nhập tên của bạn"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 text-sm"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-blue-500 text-base"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-base font-medium text-gray-700 mb-2">
                     Số điện thoại *
                   </label>
                   <input
@@ -299,13 +302,13 @@ const CartView = ({ isOpen, onClose }) => {
                     value={formData.phone}
                     onChange={handleFormChange}
                     placeholder="Nhập số điện thoại"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 text-sm"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-blue-500 text-base"
                     required
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-base font-medium text-gray-700 mb-2">
                     Địa chỉ giao hàng *
                   </label>
                   <textarea
@@ -313,30 +316,34 @@ const CartView = ({ isOpen, onClose }) => {
                     value={formData.address}
                     onChange={handleFormChange}
                     placeholder="Nhập địa chỉ chi tiết"
-                    rows="2"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 text-sm resize-none"
+                    rows="3"
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg outline-none focus:border-blue-500 text-base resize-none"
                     required
                   ></textarea>
                 </div>
 
-                <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
-                  <h4 className="font-bold text-gray-800 mb-2 text-sm">
-                    📦 Tóm tắt đơn hàng
+                <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200">
+                  <h4 className="font-bold text-gray-800 mb-3 text-base">
+                    Tóm tắt đơn hàng
                   </h4>
-                  <div className="space-y-1 text-xs">
+                  <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
                       <span className="text-gray-600">Số sản phẩm:</span>
-                      <span className="font-bold">{localCartItems.length}</span>
+                      <span className="font-bold text-base">
+                        {localCartItems.length}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Tổng số lượng:</span>
-                      <span className="font-bold">{totalQuantity}</span>
+                      <span className="font-bold text-base">
+                        {totalQuantity}
+                      </span>
                     </div>
-                    <div className="border-t pt-1 flex justify-between">
-                      <span className="font-bold text-gray-800">
+                    <div className="border-t pt-2 flex justify-between">
+                      <span className="font-bold text-gray-800 text-base">
                         Tổng tiền:
                       </span>
-                      <span className="font-bold text-red-600 text-sm">
+                      <span className="font-bold text-red-600 text-lg">
                         {totalPrice.toLocaleString("vi-VN")} VNĐ
                       </span>
                     </div>
@@ -345,18 +352,18 @@ const CartView = ({ isOpen, onClose }) => {
               </div>
             </form>
 
-            <div className="p-4 border-t bg-white flex space-x-2 flex-shrink-0">
+            <div className="p-5 border-t bg-white flex space-x-3 flex-shrink-0">
               <button
                 type="button"
                 onClick={() => setShowConsultForm(false)}
-                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 rounded transition"
+                className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-3 rounded-lg transition text-base"
               >
                 Quay lại
               </button>
               <button
                 onClick={handleSubmitOrder}
                 disabled={isSubmitting}
-                className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold py-2 rounded transition"
+                className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-bold py-3 rounded-lg transition text-base"
               >
                 {isSubmitting ? "Đang gửi..." : "Gửi đơn hàng"}
               </button>

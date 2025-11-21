@@ -14,7 +14,7 @@ const Products = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const API_BASE_URL = "http://127.0.0.1:8000/api";
+  const API_BASE_URL = "http://api.thanhdanhluxury.vn/api";
 
   // Kiểm tra trạng thái đăng nhập admin
   useEffect(() => {
@@ -253,7 +253,7 @@ const Products = () => {
                 )}
 
                 {/* Ảnh sản phẩm */}
-                <div className="h-32 bg-gray-200 overflow-hidden">
+                <div className="h-32 bg-gray-100 overflow-hidden flex items-center justify-center">
                   <img
                     src={
                       product.images && product.images.length > 0
@@ -261,7 +261,7 @@ const Products = () => {
                         : "https://via.placeholder.com/200x128?text=No+Image"
                     }
                     alt={product.name}
-                    className="w-full h-full object-cover transition duration-500 hover:scale-105"
+                    className="max-w-full max-h-full object-scale-down p-1"
                   />
                 </div>
 

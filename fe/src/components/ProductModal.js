@@ -29,11 +29,12 @@ const ProductModal = ({ product, isOpen, onClose }) => {
 
         <div className="flex flex-col md:flex-row h-full">
           {/* LEFT: Image */}
-          <div className="w-full md:w-1/2">
-            <div
-              className="h-56 xs:h-64 sm:h-72 md:h-full bg-cover bg-center rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none"
-              style={{ backgroundImage: `url(${product.image})` }}
-            ></div>
+          <div className="w-full md:w-1/2 bg-gray-100 overflow-hidden flex items-center justify-center">
+            <img
+              src={product.image}
+              alt={product.name}
+              className="max-w-full max-h-full object-scale-down p-4"
+            />
           </div>
 
           {/* RIGHT: Product Info */}
