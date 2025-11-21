@@ -70,11 +70,14 @@ const ProductModal = ({ product, isOpen, onClose }) => {
               </div>
             </div>
 
-            {/* FOOTER BUTTONS */}
+            {/* FOOTER BUTTONS - Thay đổi nút tư vấn thành link gọi điện */}
             <div className="flex space-x-3 sm:space-x-4 pt-4 border-t flex-shrink-0 mt-auto">
-              <button className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 sm:py-3 px-4 rounded-lg text-base sm:text-lg font-semibold transition">
+              <a
+                href="tel:0969745670"
+                className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 sm:py-3 px-4 rounded-lg text-base sm:text-lg font-semibold transition text-center"
+              >
                 Tư vấn ngay
-              </button>
+              </a>
               <button
                 onClick={handleAddToCart}
                 className="flex-1 bg-blue-800 hover:bg-blue-900 text-white py-2 sm:py-3 px-4 rounded-lg text-base sm:text-lg font-semibold transition"

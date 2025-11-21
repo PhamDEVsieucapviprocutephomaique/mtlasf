@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { getCartItems } from "../utils/cartUtils";
 
 const Header = ({ onCartClick }) => {
@@ -7,12 +7,11 @@ const Header = ({ onCartClick }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [cartCount, setCartCount] = useState(0);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    // Cập nhật số lượng giỏ hàng khi component mount
     setCartCount(getCartItems().length);
 
-    // Listen sự kiện storage thay đổi
     const handleStorageChange = () => {
       setCartCount(getCartItems().length);
     };
@@ -23,7 +22,11 @@ const Header = ({ onCartClick }) => {
 
   const handleSearch = (e) => {
     e.preventDefault();
-    console.log("Search query:", searchQuery);
+    if (searchQuery.trim()) {
+      // Điều hướng sang trang sản phẩm với query string
+      navigate(`/san-pham?search=${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery(""); // Reset search query sau khi tìm kiếm
+    }
   };
 
   const isActive = (path) => {
@@ -134,7 +137,7 @@ const Header = ({ onCartClick }) => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Tìm kiếm sản phẩm..."
-                  className="px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent w-64"
+                  className="px-4 py-2 border border-gray-300 rounded-l-lg focus:border-blue-800 w-64 outline-none"
                 />
                 <button
                   type="submit"
@@ -161,7 +164,7 @@ const Header = ({ onCartClick }) => {
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Tìm kiếm sản phẩm..."
-              className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:outline-none focus:ring-2 focus:ring-blue-800 focus:border-transparent"
+              className="flex-1 px-4 py-2 border border-gray-300 rounded-l-lg focus:border-blue-800 outline-none"
             />
             <button
               type="submit"

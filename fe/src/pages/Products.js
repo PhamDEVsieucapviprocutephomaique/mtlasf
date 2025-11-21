@@ -5,6 +5,7 @@ const Products = () => {
   const [products, setProducts] = useState([]);
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   // State cho bộ lọc, sử dụng 0 để đại diện cho "Tất cả"
   const [selectedBrandId, setSelectedBrandId] = useState(0);
@@ -15,7 +16,22 @@ const Products = () => {
 
   const API_BASE_URL = "http://127.0.0.1:8000/api";
 
-  // --- 1. HÀM GỌI API LẤY SẢN PHẨM (Có Lọc) ---
+  // Kiểm tra trạng thái đăng nhập admin
+  useEffect(() => {
+    const checkAdminStatus = () => {
+      const adminLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
+      setIsAdmin(adminLoggedIn);
+    };
+
+    checkAdminStatus();
+    window.addEventListener("storage", checkAdminStatus);
+
+    return () => {
+      window.removeEventListener("storage", checkAdminStatus);
+    };
+  }, []);
+
+  // --- HÀM GỌI API LẤY SẢN PHẨM ---
   const fetchProducts = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -53,17 +69,15 @@ const Products = () => {
     }
   }, [selectedBrandId, selectedCategoryId]);
 
-  // --- 2. HÀM GỌI API LẤY DỮ LIỆU LỌC (Brands và Categories) ---
+  // --- HÀM GỌI API LẤY DỮ LIỆU LỌC ---
   const fetchFilters = async () => {
     try {
-      // Lấy Brands
       const brandsResponse = await fetch(
         `${API_BASE_URL}/products/brands/list`
       );
       const brandsData = await brandsResponse.json();
       setBrands(brandsData);
 
-      // Lấy Categories
       const categoriesResponse = await fetch(
         `${API_BASE_URL}/products/categories/list`
       );
@@ -74,14 +88,36 @@ const Products = () => {
     }
   };
 
-  // --- 3. EFFECTS ---
+  // --- Hàm xóa sản phẩm ---
+  const handleDeleteProduct = async (productId, productName) => {
+    if (!window.confirm(`Bạn có chắc muốn xóa sản phẩm "${productName}"?`)) {
+      return;
+    }
 
-  // Lấy danh sách Brand/Category khi component mount
+    try {
+      const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        alert("✅ Xóa sản phẩm thành công!");
+        // Load lại dữ liệu
+        fetchProducts();
+      } else {
+        const error = await response.json();
+        alert("❌ Lỗi khi xóa sản phẩm: " + (error.detail || "Không thể xóa"));
+      }
+    } catch (error) {
+      console.error("Lỗi khi xóa sản phẩm:", error);
+      alert("❌ Lỗi kết nối khi xóa sản phẩm!");
+    }
+  };
+
+  // --- EFFECTS ---
   useEffect(() => {
     fetchFilters();
   }, []);
 
-  // Lấy danh sách Sản phẩm khi Brand/Category thay đổi
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
@@ -129,11 +165,9 @@ const Products = () => {
   return (
     <div className="pt-24 py-12 min-h-screen bg-gray-50">
       <div className="container mx-auto px-4">
-        <h1 className="text-4xl font-bold text-center text-blue-800 mb-10">
-          TẤT CẢ SẢN PHẨM
-        </h1>
+        <h1 className="text-4xl font-bold text-center text-blue-800 mb-10"></h1>
 
-        {/* Khu vực Lọc (Chỉ giữ lại Hãng và Loại) */}
+        {/* Khu vực Lọc */}
         <div className="bg-white p-6 rounded-lg shadow-xl mb-8 border border-gray-200">
           <h2 className="text-xl font-semibold text-gray-700 mb-4">
             Bộ lọc sản phẩm
@@ -203,8 +237,21 @@ const Products = () => {
             {products.map((product) => (
               <div
                 key={product.id}
-                className="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 overflow-hidden border border-gray-200"
+                className="bg-white rounded-lg shadow-md hover:shadow-lg transition duration-300 overflow-hidden border border-gray-200 relative"
               >
+                {/* Nút xóa sản phẩm - chỉ hiện khi là admin */}
+                {isAdmin && (
+                  <button
+                    onClick={() =>
+                      handleDeleteProduct(product.id, product.name)
+                    }
+                    className="absolute -top-0 -right-0 bg-red-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold hover:bg-red-700 transition duration-300 z-10"
+                    title="Xóa sản phẩm"
+                  >
+                    X
+                  </button>
+                )}
+
                 {/* Ảnh sản phẩm */}
                 <div className="h-32 bg-gray-200 overflow-hidden">
                   <img

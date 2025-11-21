@@ -58,9 +58,7 @@ const News = () => {
   return (
     <div className="pt-16 py-8">
       <div className="container mx-auto px-4">
-        <h1 className="text-4xl font-bold text-center text-blue-800 mb-8">
-          TIN TỨC
-        </h1>
+        <h1 className="text-4xl font-bold text-center text-blue-800 mb-8"></h1>
 
         {/* Featured news */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden mb-8 hover:shadow-lg transition duration-300">

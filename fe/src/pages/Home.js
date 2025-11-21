@@ -8,6 +8,7 @@ import VideoModal from "../components/VideoModal";
 const Home = () => {
   const [productGroups, setProductGroups] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const API_BASE_URL = "http://127.0.0.1:8000/api";
 
@@ -42,7 +43,23 @@ const Home = () => {
   const [activeCategory, setActiveCategory] = useState(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
 
-  // --- LOGIC LẤY DỮ LIỆU TỪ API (Đã Fix Lookup Category Name & Chuẩn hóa Description) ---
+  // Kiểm tra trạng thái đăng nhập admin
+  useEffect(() => {
+    const checkAdminStatus = () => {
+      const adminLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
+      setIsAdmin(adminLoggedIn);
+    };
+
+    checkAdminStatus();
+    // Lắng nghe sự thay đổi localStorage
+    window.addEventListener("storage", checkAdminStatus);
+
+    return () => {
+      window.removeEventListener("storage", checkAdminStatus);
+    };
+  }, []);
+
+  // --- LOGIC LẤY DỮ LIỆU TỪ API ---
   const fetchData = async () => {
     setIsLoading(true);
     try {
@@ -96,7 +113,6 @@ const Home = () => {
                 p.images && p.images.length > 0
                   ? p.images[0]
                   : "https://via.placeholder.com/300x200?text=Sơn",
-              // *** CHUẨN HÓA DESCRIPTION: Thử các tên trường phổ biến ***
               description:
                 p.description || p.content || p.full_description || null,
             };
@@ -129,7 +145,7 @@ const Home = () => {
     fetchData();
   }, []);
 
-  // --- useEffect cho Video Modal (Giữ nguyên logic cũ) ---
+  // --- useEffect cho Video Modal ---
   useEffect(() => {
     const hasSeenVideo = localStorage.getItem("hasSeenVideo");
     if (!hasSeenVideo && !isLoading) {
@@ -141,7 +157,32 @@ const Home = () => {
     }
   }, [isLoading]);
 
-  // --- Logic Xử lý Click (Giữ nguyên logic cũ) ---
+  // --- Hàm xóa sản phẩm ---
+  const handleDeleteProduct = async (productId, productName) => {
+    if (!window.confirm(`Bạn có chắc muốn xóa sản phẩm "${productName}"?`)) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/products/${productId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        alert("✅ Xóa sản phẩm thành công!");
+        // Load lại dữ liệu
+        fetchData();
+      } else {
+        const error = await response.json();
+        alert("❌ Lỗi khi xóa sản phẩm: " + (error.detail || "Không thể xóa"));
+      }
+    } catch (error) {
+      console.error("Lỗi khi xóa sản phẩm:", error);
+      alert("❌ Lỗi kết nối khi xóa sản phẩm!");
+    }
+  };
+
+  // --- Logic Xử lý Click ---
   const handleCategoryClick = (categoryId) => {
     setActiveCategory(categoryId);
     const element = document.getElementById(`category-${categoryId}`);
@@ -194,6 +235,8 @@ const Home = () => {
             <ProductSection
               group={group}
               isLast={index === productGroups.length - 1}
+              isAdmin={isAdmin}
+              onDeleteProduct={handleDeleteProduct}
             />
           </div>
         ))}

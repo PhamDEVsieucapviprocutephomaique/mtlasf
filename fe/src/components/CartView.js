@@ -13,20 +13,17 @@ const CartView = ({ isOpen, onClose }) => {
 
   const API_BASE_URL = "http://127.0.0.1:8000/api";
 
-  // Load dữ liệu từ Local Storage mỗi khi Modal mở
   useEffect(() => {
     if (isOpen) {
       setLocalCartItems(getCartItems());
     }
   }, [isOpen]);
 
-  // Xử lý khi nhấn nút Xóa
   const handleRemove = (productId) => {
     removeFromCart(productId);
     setLocalCartItems(getCartItems());
   };
 
-  // Xử lý tăng số lượng
   const handleIncreaseQuantity = (productId) => {
     setLocalCartItems((prevItems) =>
       prevItems.map((item) =>
@@ -35,7 +32,6 @@ const CartView = ({ isOpen, onClose }) => {
     );
   };
 
-  // Xử lý giảm số lượng
   const handleDecreaseQuantity = (productId) => {
     setLocalCartItems((prevItems) =>
       prevItems.map((item) =>
@@ -46,12 +42,10 @@ const CartView = ({ isOpen, onClose }) => {
     );
   };
 
-  // Tính tổng giá từ chuỗi giá
   const parsePrice = (priceStr) => {
     return parseFloat(priceStr.replace(/[^\d]/g, "")) || 0;
   };
 
-  // Tính tổng tiền
   const calculateTotal = () => {
     return localCartItems.reduce((total, item) => {
       const price = parsePrice(item.price);
@@ -59,13 +53,11 @@ const CartView = ({ isOpen, onClose }) => {
     }, 0);
   };
 
-  // Tính tổng số lượng
   const totalQuantity = localCartItems.reduce(
     (total, item) => total + item.quantity,
     0
   );
 
-  // Xử lý thay đổi form
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -74,7 +66,6 @@ const CartView = ({ isOpen, onClose }) => {
     }));
   };
 
-  // Xử lý gửi đơn hàng
   const handleSubmitOrder = async (e) => {
     e.preventDefault();
 
@@ -91,7 +82,6 @@ const CartView = ({ isOpen, onClose }) => {
     setIsSubmitting(true);
 
     try {
-      // Chuẩn bị dữ liệu đơn hàng
       const orderData = {
         customer_name: formData.name,
         customer_phone: formData.phone,
@@ -102,7 +92,6 @@ const CartView = ({ isOpen, onClose }) => {
         })),
       };
 
-      // Gửi POST request
       const response = await fetch(`${API_BASE_URL}/orders`, {
         method: "POST",
         headers: {
@@ -121,7 +110,6 @@ const CartView = ({ isOpen, onClose }) => {
           )} VNĐ`
         );
 
-        // Xóa giỏ hàng sau khi gửi
         localStorage.removeItem("shoppingCart");
         setLocalCartItems([]);
         setFormData({ name: "", phone: "", address: "" });
@@ -141,7 +129,6 @@ const CartView = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  // Component cho từng sản phẩm
   const CartItem = ({ item }) => {
     const itemPrice = parsePrice(item.price);
     const itemTotal = itemPrice * item.quantity;
@@ -164,7 +151,6 @@ const CartView = ({ isOpen, onClose }) => {
               {itemPrice.toLocaleString("vi-VN")} VNĐ
             </p>
 
-            {/* Nút +/- Số lượng */}
             <div className="flex items-center space-x-1 mt-2">
               <button
                 onClick={() => handleDecreaseQuantity(item.id)}
@@ -185,7 +171,6 @@ const CartView = ({ isOpen, onClose }) => {
           </div>
         </div>
 
-        {/* Cột bên phải: Giá tổng + Nút xóa */}
         <div className="flex flex-col items-end ml-2 flex-shrink-0">
           <p className="text-xs text-red-600 font-bold">
             {itemTotal.toLocaleString("vi-VN")} VNĐ
@@ -206,15 +191,12 @@ const CartView = ({ isOpen, onClose }) => {
 
   return (
     <div className="fixed inset-0 z-40 flex justify-end">
-      {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black bg-opacity-50"
         onClick={onClose}
       ></div>
 
-      {/* Sidebar Giỏ hàng */}
       <div className="relative w-full max-w-lg bg-white shadow-2xl overflow-hidden flex flex-col">
-        {/* Header - Sticky */}
         <div className="p-4 border-b flex justify-between items-center bg-white flex-shrink-0">
           <h3 className="text-xl font-bold text-blue-800">
             🛒 Giỏ Hàng ({localCartItems.length})
@@ -228,10 +210,8 @@ const CartView = ({ isOpen, onClose }) => {
           </button>
         </div>
 
-        {/* Nội dung chính - Scroll */}
         {!showConsultForm ? (
           <>
-            {/* Danh sách sản phẩm */}
             <div className="flex-grow overflow-y-auto p-4">
               {localCartItems.length === 0 ? (
                 <p className="text-center text-gray-500 py-8">
@@ -246,7 +226,6 @@ const CartView = ({ isOpen, onClose }) => {
               )}
             </div>
 
-            {/* Tóm tắt đơn hàng - Sticky bottom */}
             <div className="p-4 border-t bg-gray-50 flex-shrink-0">
               <div className="bg-blue-50 p-3 rounded-lg mb-3">
                 <div className="flex justify-between mb-2">
@@ -269,14 +248,13 @@ const CartView = ({ isOpen, onClose }) => {
                 </div>
               </div>
 
-              {/* Nút tư vấn */}
-              <button
-                onClick={() => setShowConsultForm(true)}
-                disabled={localCartItems.length === 0}
-                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-semibold py-2 rounded transition duration-200 mb-2"
+              {/* Thay đổi nút tư vấn thành link gọi điện */}
+              <a
+                href="tel:0969745670"
+                className="block w-full bg-red-600 hover:bg-red-700 text-white font-semibold py-2 rounded transition duration-200 mb-2 text-center"
               >
                 TƯ VẤN NGAY VỀ ĐƠN HÀNG
-              </button>
+              </a>
               <button
                 onClick={onClose}
                 className="w-full bg-gray-300 hover:bg-gray-400 text-gray-800 font-semibold py-2 rounded transition duration-200"
@@ -286,9 +264,7 @@ const CartView = ({ isOpen, onClose }) => {
             </div>
           </>
         ) : (
-          /* FORM TƯ VẤN */
           <>
-            {/* Form - Scroll */}
             <form
               onSubmit={handleSubmitOrder}
               className="flex-grow overflow-y-auto p-4"
@@ -298,7 +274,6 @@ const CartView = ({ isOpen, onClose }) => {
               </h3>
 
               <div className="space-y-3 mb-4">
-                {/* Tên khách hàng */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Tên khách hàng *
@@ -309,12 +284,11 @@ const CartView = ({ isOpen, onClose }) => {
                     value={formData.name}
                     onChange={handleFormChange}
                     placeholder="Nhập tên của bạn"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 text-sm"
                     required
                   />
                 </div>
 
-                {/* Số điện thoại */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Số điện thoại *
@@ -325,12 +299,11 @@ const CartView = ({ isOpen, onClose }) => {
                     value={formData.phone}
                     onChange={handleFormChange}
                     placeholder="Nhập số điện thoại"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 text-sm"
                     required
                   />
                 </div>
 
-                {/* Địa chỉ */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Địa chỉ giao hàng *
@@ -341,12 +314,11 @@ const CartView = ({ isOpen, onClose }) => {
                     onChange={handleFormChange}
                     placeholder="Nhập địa chỉ chi tiết"
                     rows="2"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm resize-none"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg outline-none focus:border-blue-500 text-sm resize-none"
                     required
                   ></textarea>
                 </div>
 
-                {/* Tóm tắt đơn hàng */}
                 <div className="bg-yellow-50 p-3 rounded-lg border border-yellow-200">
                   <h4 className="font-bold text-gray-800 mb-2 text-sm">
                     📦 Tóm tắt đơn hàng
@@ -373,7 +345,6 @@ const CartView = ({ isOpen, onClose }) => {
               </div>
             </form>
 
-            {/* Nút hành động - Fixed bottom */}
             <div className="p-4 border-t bg-white flex space-x-2 flex-shrink-0">
               <button
                 type="button"

@@ -1,64 +1,62 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-// --- COMPONENT MODAL CHI TIẾT ĐƠN HÀNG (Đã bỏ truncate) ---
+// --- COMPONENT MODAL CHI TIẾT ĐƠN HÀNG ---
 const OrderDetailModal = ({ order, isOpen, onClose }) => {
   if (!isOpen || !order) return null;
 
-  // Sử dụng trường 'items' để lấy danh sách sản phẩm (Đã đồng bộ với FastAPI Backend)
   const items = order.items || [];
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Background Overlay */}
       <div
         className="absolute inset-0 bg-black bg-opacity-70"
         onClick={onClose}
       ></div>
 
-      {/* Modal Content */}
-      <div className="relative bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto transform transition-all duration-300 scale-100">
-        {/* Close Button */}
+      <div className="relative bg-white rounded-xl shadow-2xl max-w-3xl w-full max-h-[85vh] overflow-y-auto">
         <button
-          className="absolute top-4 right-4 text-3xl text-gray-500 hover:text-red-600 transition duration-300 z-10 bg-white rounded-full w-10 h-10 flex items-center justify-center border border-gray-200"
+          className="absolute top-3 right-3 text-2xl text-gray-500 hover:text-red-600 transition z-10 bg-white rounded-full w-8 h-8 flex items-center justify-center border"
           onClick={onClose}
         >
           ✕
         </button>
 
-        <div className="p-8">
-          <h2 className="text-3xl font-bold text-blue-800 mb-6 border-b pb-2">
+        <div className="p-6">
+          <h2 className="text-2xl font-bold text-blue-800 mb-4 border-b pb-2">
             Chi Tiết Đơn Hàng #{order.id}
           </h2>
 
-          {/* Thông tin Khách hàng và Tổng tiền */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4 p-3 bg-blue-50 rounded-lg border">
             <div>
-              <p className="font-semibold text-gray-700">Khách hàng:</p>
-              <p className="font-bold text-xl text-blue-800">
+              <p className="font-semibold text-gray-700 text-sm">Khách hàng:</p>
+              <p className="font-bold text-lg text-blue-800">
                 {order.customer_name}
               </p>
             </div>
             <div>
-              <p className="font-semibold text-gray-700">Số điện thoại:</p>
-              <p className="font-bold text-xl text-blue-800">
+              <p className="font-semibold text-gray-700 text-sm">
+                Số điện thoại:
+              </p>
+              <p className="font-bold text-lg text-blue-800">
                 {order.customer_phone}
               </p>
             </div>
             <div className="md:col-span-2">
-              <p className="font-semibold text-gray-700">Địa chỉ:</p>
-              <p className="text-lg font-medium text-gray-800">
+              <p className="font-semibold text-gray-700 text-sm">Địa chỉ:</p>
+              <p className="text-base font-medium text-gray-800">
                 {order.customer_address}
               </p>
             </div>
             <div>
-              <p className="font-semibold text-gray-700">Ngày đặt:</p>
-              <p className="font-bold text-xl text-blue-800">
+              <p className="font-semibold text-gray-700 text-sm">Ngày đặt:</p>
+              <p className="font-bold text-lg text-blue-800">
                 {new Date(order.created_at).toLocaleDateString("vi-VN")}
               </p>
             </div>
             <div>
-              <p className="font-semibold text-gray-700">Tổng tiền:</p>
-              <p className="font-bold text-3xl text-red-600">
+              <p className="font-semibold text-gray-700 text-sm">Tổng tiền:</p>
+              <p className="font-bold text-2xl text-red-600">
                 {order.total_price
                   ? order.total_price.toLocaleString("vi-VN")
                   : 0}{" "}
@@ -67,44 +65,33 @@ const OrderDetailModal = ({ order, isOpen, onClose }) => {
             </div>
           </div>
 
-          {/* Thông tin Chi tiết sản phẩm */}
-          <h3 className="text-2xl font-bold text-gray-800 mb-4">
-            Danh Sách Sản Phẩm (Tổng: {items.length})
+          <h3 className="text-xl font-bold text-gray-800 mb-3">
+            Danh Sách Sản Phẩm ({items.length})
           </h3>
 
-          <div className="space-y-4 max-h-80 overflow-y-auto pr-2">
+          <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
             {items.map((item, index) => (
               <div
                 key={index}
-                className="flex justify-between items-start p-4 border border-gray-200 rounded-lg bg-white shadow-sm"
+                className="flex justify-between items-start p-3 border rounded-lg bg-white shadow-sm"
               >
-                {/* HIỂN THỊ ĐẦY ĐỦ TÊN SẢN PHẨM (Đã bỏ truncate) */}
-                <div className="flex-1 min-w-0 pr-4">
-                  <p className="font-bold text-lg text-gray-800 break-words">
+                <div className="flex-1 min-w-0 pr-3">
+                  <p className="font-bold text-base text-gray-800 break-words">
                     {item.product_name}
                   </p>
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-xs text-gray-600 mt-1">
                     Mã SP:{" "}
-                    <span className="font-medium text-blue-700">
-                      {item.product_id}
-                    </span>
+                    <span className="font-medium">{item.product_id}</span>
                   </p>
                 </div>
-
-                {/* Số lượng và Giá */}
-                <div className="ml-4 text-right flex-shrink-0">
-                  <p className="text-lg font-bold text-red-500">
+                <div className="text-right flex-shrink-0">
+                  <p className="text-base font-bold text-red-500">
                     {item.price ? item.price.toLocaleString("vi-VN") : 0} VNĐ
                   </p>
-                  <p className="text-sm text-gray-600">x {item.quantity}</p>
+                  <p className="text-xs text-gray-600">x {item.quantity}</p>
                 </div>
               </div>
             ))}
-            {items.length === 0 && (
-              <div className="text-center text-gray-500 p-4 border rounded-lg bg-gray-50">
-                Không có chi tiết sản phẩm cho đơn hàng này.
-              </div>
-            )}
           </div>
         </div>
       </div>
@@ -114,6 +101,11 @@ const OrderDetailModal = ({ order, isOpen, onClose }) => {
 
 // --- COMPONENT CHÍNH ADMIN ---
 const Admin = () => {
+  const navigate = useNavigate();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loginForm, setLoginForm] = useState({ username: "", password: "" });
+  const [loginError, setLoginError] = useState("");
+
   const [activeTab, setActiveTab] = useState("add-product");
   const [orders, setOrders] = useState([]);
   const [brands, setBrands] = useState([]);
@@ -133,12 +125,42 @@ const Admin = () => {
 
   const API_BASE_URL = "http://127.0.0.1:8000/api";
 
+  // Kiểm tra trạng thái đăng nhập khi component mount
   useEffect(() => {
-    fetchOrders();
-    fetchBrandsAndCategories();
+    const adminLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
+    setIsLoggedIn(adminLoggedIn);
   }, []);
 
-  // --- Logic Modal ---
+  // Xử lý đăng nhập
+  const handleLogin = (e) => {
+    e.preventDefault();
+    if (loginForm.username === "admin" && loginForm.password === "0969745670") {
+      setIsLoggedIn(true);
+      setLoginError("");
+      // Lưu trạng thái đăng nhập vào localStorage
+      localStorage.setItem("adminLoggedIn", "true");
+    } else {
+      setLoginError("Tài khoản hoặc mật khẩu không đúng!");
+    }
+  };
+
+  // Xử lý đăng xuất
+  const handleLogout = () => {
+    setIsLoggedIn(false);
+    localStorage.removeItem("adminLoggedIn");
+  };
+
+  const handleLoginClose = () => {
+    navigate("/");
+  };
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchOrders();
+      fetchBrandsAndCategories();
+    }
+  }, [isLoggedIn]);
+
   const handleViewOrderDetails = (order) => {
     setSelectedOrder(order);
     setIsModalOpen(true);
@@ -149,24 +171,20 @@ const Admin = () => {
     setSelectedOrder(null);
   };
 
-  // --- API Orders ---
   const fetchOrders = async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/orders`);
       const data = await response.json();
-
       const normalizedOrders = data.map((order) => ({
         ...order,
         items: order.items || [],
       }));
-
       setOrders(normalizedOrders);
     } catch (error) {
       console.error("Lỗi khi lấy đơn hàng:", error);
     }
   };
 
-  // --- API Brands/Categories ---
   const fetchBrandsAndCategories = async () => {
     try {
       const brandsResponse = await fetch(
@@ -195,7 +213,6 @@ const Admin = () => {
     }
   };
 
-  // --- Xử lý POST Sản Phẩm ---
   const handleAddProduct = async (e) => {
     e.preventDefault();
 
@@ -220,16 +237,13 @@ const Admin = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/products`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(productData),
       });
 
       if (response.ok) {
         const result = await response.json();
         alert(`Thêm sản phẩm "${result.name}" thành công!`);
-
         setNewProduct({
           name: "",
           category_id: categories.length > 0 ? categories[0].id : "",
@@ -246,30 +260,100 @@ const Admin = () => {
       }
     } catch (error) {
       console.error("Lỗi khi thêm sản phẩm:", error);
-      alert("Lỗi khi thêm sản phẩm (Kết nối Server thất bại)!");
+      alert("Lỗi khi thêm sản phẩm!");
     }
   };
 
-  // --- Xử lý thay đổi Input/Select ---
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setNewProduct((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setNewProduct((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Hiển thị form đăng nhập nếu chưa đăng nhập
+  if (!isLoggedIn) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60">
+        <div className="relative bg-white rounded-xl shadow-2xl w-full max-w-md p-8">
+          <button
+            onClick={handleLoginClose}
+            className="absolute top-4 right-4 text-2xl text-gray-500 hover:text-red-600"
+          >
+            ✕
+          </button>
+
+          <h2 className="text-3xl font-bold text-blue-800 mb-6 text-center">
+            Đăng Nhập Admin
+          </h2>
+
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium mb-2">
+                Tài khoản
+              </label>
+              <input
+                type="text"
+                value={loginForm.username}
+                onChange={(e) =>
+                  setLoginForm({ ...loginForm, username: e.target.value })
+                }
+                className="w-full p-3 border rounded-lg outline-none focus:border-blue-800"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium mb-2">Mật khẩu</label>
+              <input
+                type="password"
+                value={loginForm.password}
+                onChange={(e) =>
+                  setLoginForm({ ...loginForm, password: e.target.value })
+                }
+                className="w-full p-3 border rounded-lg outline-none focus:border-blue-800"
+                required
+              />
+            </div>
+
+            {loginError && (
+              <p className="text-red-600 text-sm text-center">{loginError}</p>
+            )}
+
+            <button
+              type="submit"
+              className="w-full bg-blue-800 text-white py-3 rounded-lg hover:bg-blue-900 transition font-semibold"
+            >
+              Đăng Nhập
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="pt-24 py-8 min-h-screen bg-gray-50">
-      <div className="container mx-auto px-4">
-        <h1 className="text-4xl font-bold text-center text-blue-800 mb-8">
-          TRANG QUẢN TRỊ
-        </h1>
+    <div className="pt-20 py-6 min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 max-w-6xl">
+        {/* Header với nút đăng xuất */}
+        <div className="flex justify-between items-center mb-6">
+          <h1 className="text-3xl font-bold text-center text-blue-800"></h1>
+          <br></br>
+          <br></br>
+          <br></br>
+          <br></br>
+          <br></br>
+          <br></br>
+          <button
+            onClick={handleLogout}
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg transition font-semibold"
+          >
+            Đăng xuất
+          </button>
+        </div>
 
         {/* Tabs */}
-        <div className="flex border-b mb-6 bg-white shadow-sm rounded-t-lg overflow-hidden">
+        <div className="flex border-b mb-4 bg-white shadow-sm rounded-t-lg overflow-hidden">
           <button
-            className={`px-6 py-3 font-medium transition duration-300 ${
+            className={`px-5 py-2 font-medium transition ${
               activeTab === "add-product"
                 ? "border-b-4 border-blue-800 text-blue-800 bg-gray-50"
                 : "text-gray-600 hover:bg-gray-100"
@@ -279,7 +363,7 @@ const Admin = () => {
             Thêm Sản Phẩm
           </button>
           <button
-            className={`px-6 py-3 font-medium transition duration-300 ${
+            className={`px-5 py-2 font-medium transition ${
               activeTab === "orders"
                 ? "border-b-4 border-blue-800 text-blue-800 bg-gray-50"
                 : "text-gray-600 hover:bg-gray-100"
@@ -290,17 +374,17 @@ const Admin = () => {
           </button>
         </div>
 
-        {/* Thêm Sản Phẩm Tab */}
+        {/* Thêm Sản Phẩm */}
         {activeTab === "add-product" && (
-          <div className="max-w-4xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">
+          <div>
+            <h2 className="text-xl font-bold mb-4 text-center text-gray-700">
               Thêm Sản Phẩm Mới
             </h2>
-            <div className="bg-white p-8 rounded-lg shadow-xl border border-gray-200">
+            <div className="bg-white p-6 rounded-lg shadow-lg border">
               <form onSubmit={handleAddProduct}>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                   <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700">
+                    <label className="block text-sm font-medium mb-1">
                       Tên sản phẩm *
                     </label>
                     <input
@@ -309,13 +393,12 @@ const Admin = () => {
                       value={newProduct.name}
                       onChange={handleInputChange}
                       required
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800"
-                      placeholder="Nhập tên sản phẩm"
+                      className="w-full p-2 border rounded-lg outline-none focus:border-blue-800"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700">
+                    <label className="block text-sm font-medium mb-1">
                       Giá *
                     </label>
                     <input
@@ -326,47 +409,42 @@ const Admin = () => {
                       required
                       min="0"
                       step="1000"
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800"
-                      placeholder="Nhập giá sản phẩm (VND)"
+                      className="w-full p-2 border rounded-lg outline-none focus:border-blue-800"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700">
-                      Loại sản phẩm (Category) *
+                    <label className="block text-sm font-medium mb-1">
+                      Loại sản phẩm *
                     </label>
                     <select
                       name="category_id"
                       value={newProduct.category_id}
                       onChange={handleInputChange}
                       required
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800"
+                      className="w-full p-2 border rounded-lg outline-none focus:border-blue-800"
                     >
-                      <option value="" disabled>
-                        Chọn loại sản phẩm
-                      </option>
-                      {categories.map((category) => (
-                        <option key={category.id} value={category.id}>
-                          {category.name}
+                      <option value="">Chọn loại</option>
+                      {categories.map((cat) => (
+                        <option key={cat.id} value={cat.id}>
+                          {cat.name}
                         </option>
                       ))}
                     </select>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium mb-2 text-gray-700">
-                      Hãng (Brand) *
+                    <label className="block text-sm font-medium mb-1">
+                      Hãng *
                     </label>
                     <select
                       name="brand_id"
                       value={newProduct.brand_id}
                       onChange={handleInputChange}
                       required
-                      className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800"
+                      className="w-full p-2 border rounded-lg outline-none focus:border-blue-800"
                     >
-                      <option value="" disabled>
-                        Chọn hãng
-                      </option>
+                      <option value="">Chọn hãng</option>
                       {brands.map((brand) => (
                         <option key={brand.id} value={brand.id}>
                           {brand.name}
@@ -376,77 +454,56 @@ const Admin = () => {
                   </div>
                 </div>
 
-                <div className="mb-6">
-                  <label className="block text-sm font-medium mb-2 text-gray-700">
-                    Mô tả sản phẩm *
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-1">
+                    Mô tả *
                   </label>
                   <textarea
                     name="description"
                     value={newProduct.description}
                     onChange={handleInputChange}
                     required
-                    rows="4"
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-800"
-                    placeholder="Nhập mô tả sản phẩm"
+                    rows="3"
+                    className="w-full p-2 border rounded-lg outline-none focus:border-blue-800"
                   />
-                </div>
-
-                <div className="mb-6 p-4 bg-gray-50 rounded-lg">
-                  <label className="block text-sm font-medium mb-2 text-gray-700">
-                    Hình ảnh sản phẩm (Tạm thời)
-                  </label>
-                  <div className="flex items-center justify-center">
-                    <img
-                      src={newProduct.images[0]}
-                      alt="Preview"
-                      className="w-48 h-32 object-cover rounded-lg border border-gray-300 shadow-md"
-                    />
-                  </div>
                 </div>
 
                 <button
                   type="submit"
-                  className="w-full bg-blue-800 text-white py-3 px-6 rounded-lg hover:bg-blue-900 transition duration-300 text-lg font-semibold shadow-lg"
+                  className="w-full bg-blue-800 text-white py-2 rounded-lg hover:bg-blue-900 transition font-semibold"
                 >
-                  Thêm Sản Phẩm Mới
+                  Thêm Sản Phẩm
                 </button>
               </form>
             </div>
           </div>
         )}
 
-        {/* Đơn Hàng Tab */}
+        {/* Đơn Hàng */}
         {activeTab === "orders" && (
           <div>
-            <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">
+            <h2 className="text-xl font-bold mb-4 text-center text-gray-700">
               Danh Sách Đơn Hàng
             </h2>
 
             {orders.length === 0 ? (
-              <div className="text-center text-gray-500 py-8 text-xl bg-white rounded-lg shadow-md">
-                Chưa có đơn hàng nào
+              <div className="text-center text-gray-500 py-6 bg-white rounded-lg">
+                Chưa có đơn hàng
               </div>
             ) : (
-              <div className="bg-white rounded-lg shadow-xl overflow-x-auto">
-                <table className="w-full min-w-[700px]">
+              <div className="bg-white rounded-lg shadow-lg overflow-x-auto">
+                <table className="w-full min-w-[600px]">
                   <thead className="bg-blue-800 text-white">
                     <tr>
-                      <th className="px-6 py-4 text-left font-semibold">
-                        Mã ĐH
+                      <th className="px-4 py-3 text-left text-sm">Mã ĐH</th>
+                      <th className="px-4 py-3 text-left text-sm">
+                        Khách hàng
                       </th>
-                      <th
-                        className="px-6 py-4 text-left font-semibold"
-                        style={{ minWidth: "150px" }}
-                      >
-                        Tên Khách hàng
-                      </th>
-                      <th className="px-6 py-4 text-left font-semibold">
-                        Số điện thoại
-                      </th>
-                      <th className="px-6 py-4 text-right font-semibold">
+                      <th className="px-4 py-3 text-left text-sm">SĐT</th>
+                      <th className="px-4 py-3 text-right text-sm">
                         Tổng tiền
                       </th>
-                      <th className="px-6 py-4 text-center font-semibold">
+                      <th className="px-4 py-3 text-center text-sm">
                         Hành động
                       </th>
                     </tr>
@@ -455,28 +512,29 @@ const Admin = () => {
                     {orders.map((order) => (
                       <tr
                         key={order.id}
-                        className="border-b hover:bg-blue-50/50 transition duration-150"
+                        className="border-b hover:bg-blue-50/50"
                       >
-                        <td className="px-6 py-4 font-medium text-blue-600">
+                        <td className="px-4 py-3 text-sm font-medium text-blue-600">
                           #{order.id}
                         </td>
-                        {/* Đã bỏ 'truncate' để cho phép tên xuống dòng */}
-                        <td className="px-6 py-4 font-medium break-words">
+                        <td className="px-4 py-3 text-sm break-words">
                           {order.customer_name}
                         </td>
-                        <td className="px-6 py-4">{order.customer_phone}</td>
-                        <td className="px-6 py-4 font-bold text-red-600 text-right">
+                        <td className="px-4 py-3 text-sm">
+                          {order.customer_phone}
+                        </td>
+                        <td className="px-4 py-3 text-sm font-bold text-red-600 text-right">
                           {order.total_price
                             ? order.total_price.toLocaleString("vi-VN")
                             : 0}{" "}
                           VNĐ
                         </td>
-                        <td className="px-6 py-4 text-center">
+                        <td className="px-4 py-3 text-center">
                           <button
                             onClick={() => handleViewOrderDetails(order)}
-                            className="bg-green-600 hover:bg-green-700 text-white text-sm px-3 py-1 rounded-lg transition duration-300"
+                            className="bg-green-600 hover:bg-green-700 text-white text-xs px-3 py-1 rounded transition"
                           >
-                            Xem chi tiết
+                            Chi tiết
                           </button>
                         </td>
                       </tr>
@@ -489,7 +547,6 @@ const Admin = () => {
         )}
       </div>
 
-      {/* Modal Chi Tiết Đơn Hàng */}
       <OrderDetailModal
         order={selectedOrder}
         isOpen={isModalOpen}
