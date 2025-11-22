@@ -20,12 +20,16 @@ const Header = ({ onCartClick }) => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
+  // Scroll to top khi location thay đổi
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [location.pathname]);
+
   const handleSearch = (e) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      // Điều hướng sang trang sản phẩm với query string
       navigate(`/san-pham?search=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery(""); // Reset search query sau khi tìm kiếm
+      setSearchQuery("");
     }
   };
 
@@ -39,13 +43,23 @@ const Header = ({ onCartClick }) => {
     setIsMenuOpen(!isMenuOpen);
   };
 
+  // Hàm xử lý click link và scroll to top
+  const handleLinkClick = () => {
+    setIsMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
   return (
     <>
       <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
         <div className="container mx-auto px-4 py-3">
           <div className="flex justify-between items-center">
             {/* Logo */}
-            <Link to="/" className="text-3xl font-bold text-blue-800">
+            <Link
+              to="/"
+              onClick={handleLinkClick}
+              className="text-3xl font-bold text-blue-800"
+            >
               Thanhdanhluxury
             </Link>
 
@@ -55,6 +69,7 @@ const Header = ({ onCartClick }) => {
                 <li>
                   <Link
                     to="/"
+                    onClick={handleLinkClick}
                     className={`${isActive(
                       "/"
                     )} transition duration-300 text-lg`}
@@ -65,6 +80,7 @@ const Header = ({ onCartClick }) => {
                 <li>
                   <Link
                     to="/san-pham"
+                    onClick={handleLinkClick}
                     className={`${isActive(
                       "/san-pham"
                     )} transition duration-300 text-lg`}
@@ -75,6 +91,7 @@ const Header = ({ onCartClick }) => {
                 <li>
                   <Link
                     to="/tin-tuc"
+                    onClick={handleLinkClick}
                     className={`${isActive(
                       "/tin-tuc"
                     )} transition duration-300 text-lg`}
@@ -85,6 +102,7 @@ const Header = ({ onCartClick }) => {
                 <li>
                   <Link
                     to="/lien-he"
+                    onClick={handleLinkClick}
                     className={`${isActive(
                       "/lien-he"
                     )} transition duration-300 text-lg`}
@@ -95,6 +113,7 @@ const Header = ({ onCartClick }) => {
                 <li>
                   <Link
                     to="/admin"
+                    onClick={handleLinkClick}
                     className={`${isActive(
                       "/admin"
                     )} transition duration-300 text-lg`}
@@ -197,7 +216,7 @@ const Header = ({ onCartClick }) => {
                     <Link
                       to="/"
                       className="block py-4 text-2xl font-medium border-b border-gray-200"
-                      onClick={toggleMenu}
+                      onClick={handleLinkClick}
                     >
                       Trang chủ
                     </Link>
@@ -206,7 +225,7 @@ const Header = ({ onCartClick }) => {
                     <Link
                       to="/san-pham"
                       className="block py-4 text-2xl font-medium border-b border-gray-200"
-                      onClick={toggleMenu}
+                      onClick={handleLinkClick}
                     >
                       Sản phẩm
                     </Link>
@@ -215,7 +234,7 @@ const Header = ({ onCartClick }) => {
                     <Link
                       to="/tin-tuc"
                       className="block py-4 text-2xl font-medium border-b border-gray-200"
-                      onClick={toggleMenu}
+                      onClick={handleLinkClick}
                     >
                       Tin tức
                     </Link>
@@ -224,7 +243,7 @@ const Header = ({ onCartClick }) => {
                     <Link
                       to="/lien-he"
                       className="block py-4 text-2xl font-medium border-b border-gray-200"
-                      onClick={toggleMenu}
+                      onClick={handleLinkClick}
                     >
                       Liên hệ
                     </Link>
@@ -233,7 +252,7 @@ const Header = ({ onCartClick }) => {
                     <Link
                       to="/admin"
                       className="block py-4 text-2xl font-medium"
-                      onClick={toggleMenu}
+                      onClick={handleLinkClick}
                     >
                       Admin
                     </Link>

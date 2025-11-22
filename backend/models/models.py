@@ -81,3 +81,27 @@ class SiteSettings(SQLModel, table=True):
     id: int = Field(default=None, primary_key=True)
     youtube_url: Optional[str] = Field(default=None, max_length=500)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+# --- 6. Model Banner ---
+
+class Banner(SQLModel, table=True):
+    """Model Banner cho trang chủ"""
+    __tablename__ = "banners"
+    
+    id: int = Field(default=None, primary_key=True)
+    title: Optional[str] = Field(default=None, max_length=255)  # Tiêu đề (có thể null)
+    content: Optional[str] = Field(default=None, sa_column=Column(Text))  # Nội dung (có thể null)
+    image_url: str = Field(max_length=500)  # URL ảnh (bắt buộc)
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+
+# --- 7. Model Tin Tức (News) ---
+
+class News(SQLModel, table=True):
+    """Model Tin tức"""
+    __tablename__ = "news"
+    
+    id: int = Field(default=None, primary_key=True)
+    title: str = Field(max_length=255)  # Tiêu đề
+    content: str = Field(sa_column=Column(Text))  # Nội dung
+    images: List[str] = Field(sa_column=Column(JSON), default=[])  # List các URL ảnh
+    created_at: datetime = Field(default_factory=datetime.utcnow)

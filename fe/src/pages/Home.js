@@ -10,7 +10,8 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  const API_BASE_URL = "http://api.thanhdanhluxury.vn/api";
+  // const API_BASE_URL = "http://api.thanhdanhluxury.vn/api";
+  const API_BASE_URL = "http://localhost:8000/api";
 
   // Data tin tức (Giữ nguyên)
   const news = [
@@ -19,27 +20,38 @@ const Home = () => {
       title: "Xu hướng màu sơn nội thất 2023",
       excerpt: "Khám phá những màu sắc thịnh hành cho không gian sống",
       date: "15/10/2023",
+      image:
+        "https://image.thanhdanhluxury.vn/img_f72fb88c-6c4b-405d-9098-e679e8bc659d.webp",
+      category: "Xu Hướng",
     },
     {
       id: 2,
       title: "Hướng dẫn chọn sơn phù hợp cho ngôi nhà",
       excerpt: "Bí quyết lựa chọn sơn theo phong cách và không gian",
       date: "10/10/2023",
+      image:
+        "https://image.thanhdanhluxury.vn/img_2f385803-82c2-4741-b5b2-dec8f3fc8a4b.webp",
+      category: "Mẹo Hay",
     },
     {
       id: 3,
       title: "Công nghệ sơn thân thiện môi trường",
       excerpt: "Sơn không mùi, an toàn cho sức khỏe gia đình",
       date: "05/10/2023",
+      image:
+        "https://image.thanhdanhluxury.vn/img_d1ba3a95-827f-47ed-9e51-5cc65279472c.webp",
+      category: "Công Nghệ",
     },
     {
       id: 4,
       title: "Bí quyết bảo quản sơn đúng cách",
       excerpt: "Cách giữ sơn luôn trong tình trạng tốt nhất sau khi mở nắp",
       date: "01/10/2023",
+      image:
+        "https://image.thanhdanhluxury.vn/img_5c7bff11-1a57-4325-9566-fdd5ee200b8d.webp",
+      category: "Kinh Nghiệm",
     },
   ];
-
   const [activeCategory, setActiveCategory] = useState(null);
   const [showVideoModal, setShowVideoModal] = useState(false);
 

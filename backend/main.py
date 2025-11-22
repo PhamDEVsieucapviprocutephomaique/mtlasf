@@ -11,7 +11,6 @@ from models.models import (
     SiteSettings, 
     ProductBrand, 
     ProductCategory, 
-    # Import các hằng số đã định nghĩa trong models.py
     DEFAULT_BRANDS, 
     DEFAULT_CATEGORIES
 )
@@ -20,7 +19,9 @@ from models.models import (
 from api.products import router as products_router
 from api.orders import router as orders_router
 from api.settings import router as settings_router
-from api.upload import router as upload_router 
+from api.upload import router as upload_router
+from api.banners import router as banners_router  # NEW
+from api.news import router as news_router  # NEW
 
 
 app = FastAPI(
@@ -42,7 +43,9 @@ app.add_middleware(
 app.include_router(products_router, prefix="/api/products", tags=["Products"])
 app.include_router(orders_router, prefix="/api/orders", tags=["Orders"])
 app.include_router(settings_router, prefix="/api/settings", tags=["Settings"])
-app.include_router(upload_router, prefix="/api/upload", tags=["Upload"]) 
+app.include_router(upload_router, prefix="/api/upload", tags=["Upload"])
+app.include_router(banners_router, prefix="/api/banners", tags=["Banners"])  # NEW
+app.include_router(news_router, prefix="/api/news", tags=["News"])  # NEW
 
 
 def seed_default_data(db: Session):
@@ -99,7 +102,9 @@ def root():
         "endpoints": {
             "products": "/api/products",
             "orders": "/api/orders",
-            "settings": "/api/settings"
+            "settings": "/api/settings",
+            "banners": "/api/banners",
+            "news": "/api/news"
         }
     }
 
@@ -107,5 +112,3 @@ def root():
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
-
-

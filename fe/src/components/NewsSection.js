@@ -1,39 +1,52 @@
-import React from "react";
+import React, { useState } from "react";
 
 const NewsSection = ({ news }) => {
-  const featuredNews = {
-    id: 1,
-    title: "KOVA - Giải Pháp Sơn Thông Minh",
-    excerpt:
-      "Sơn KOVA với công nghệ Nano tiên tiến, chống thấm vượt trội và độ bền cao.",
-    image:
-      "https://image.thanhdanhluxury.vn/img_f72fb88c-6c4b-405d-9098-e679e8bc659d.webp",
-    category: "Sơn Cao Cấp",
-  };
+  const [imageLoaded, setImageLoaded] = useState({});
 
-  const otherNews = [
-    {
-      id: 2,
-      title: "JOTUN - Sơn Công Nghiệp",
-      excerpt: "Sơn công nghiệp đáp ứng tiêu chuẩn chất lượng quốc tế.",
-      image:
-        "https://image.thanhdanhluxury.vn/img_2f385803-82c2-4741-b5b2-dec8f3fc8a4b.webp",
-    },
-    {
-      id: 3,
-      title: "DULUX - Thương Hiệu Số 1",
-      excerpt: "Màu sắc chuẩn xác và độ phủ cao, tiết kiệm chi phí.",
-      image:
-        "https://image.thanhdanhluxury.vn/img_d1ba3a95-827f-47ed-9e51-5cc65279472c.webp",
-    },
-    {
-      id: 4,
-      title: "SIKA - Sơn Chuyên Dụng",
-      excerpt: "Giải pháp sơn kỹ thuật cao cho công trình đặc biệt.",
-      image:
-        "https://image.thanhdanhluxury.vn/img_5c7bff11-1a57-4325-9566-fdd5ee200b8d.webp",
-    },
-  ];
+  // Sử dụng data từ prop news thay vì data cứng
+  const featuredNews =
+    news && news.length > 0
+      ? news[0]
+      : {
+          id: 1,
+          title: "KOVA - Giải Pháp Sơn Thông Minh",
+          excerpt:
+            "Sơn KOVA với công nghệ Nano tiên tiến, chống thấm vượt trội và độ bền cao.",
+          image:
+            "https://image.thanhdanhluxury.vn/img_f72fb88c-6c4b-405d-9098-e679e8bc659d.webp",
+          category: "Sơn Cao Cấp",
+        };
+
+  const otherNews =
+    news && news.length > 1
+      ? news.slice(1)
+      : [
+          {
+            id: 2,
+            title: "JOTUN - Sơn Công Nghiệp",
+            excerpt: "Sơn công nghiệp đáp ứng tiêu chuẩn chất lượng quốc tế.",
+            image:
+              "https://image.thanhdanhluxury.vn/img_2f385803-82c2-4741-b5b2-dec8f3fc8a4b.webp",
+          },
+          {
+            id: 3,
+            title: "DULUX - Thương Hiệu Số 1",
+            excerpt: "Màu sắc chuẩn xác và độ phủ cao, tiết kiệm chi phí.",
+            image:
+              "https://image.thanhdanhluxury.vn/img_d1ba3a95-827f-47ed-9e51-5cc65279472c.webp",
+          },
+          {
+            id: 4,
+            title: "SIKA - Sơn Chuyên Dụng",
+            excerpt: "Giải pháp sơn kỹ thuật cao cho công trình đặc biệt.",
+            image:
+              "https://image.thanhdanhluxury.vn/img_5c7bff11-1a57-4325-9566-fdd5ee200b8d.webp",
+          },
+        ];
+
+  const handleImageLoad = (id) => {
+    setImageLoaded((prev) => ({ ...prev, [id]: true }));
+  };
 
   const handleReadMore = () => {
     window.location.href = "/tin-tuc";
@@ -50,15 +63,28 @@ const NewsSection = ({ news }) => {
         <div className="bg-white rounded-lg shadow-md overflow-hidden mb-6 hover:shadow-lg transition duration-300">
           <div className="md:flex">
             <div className="md:w-2/5">
-              <img
-                src={featuredNews.image}
-                alt={featuredNews.title}
-                className="w-full h-48 object-contain p-3 bg-gray-50"
-              />
+              <div className="relative h-48 bg-gray-100">
+                {!imageLoaded[`featured-${featuredNews.id}`] && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-6 h-6 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
+                <img
+                  src={featuredNews.image}
+                  alt={featuredNews.title}
+                  className={`w-full h-full object-scale-down p-2 bg-gray-50 ${
+                    !imageLoaded[`featured-${featuredNews.id}`]
+                      ? "opacity-0"
+                      : "opacity-100"
+                  } transition-opacity duration-200`}
+                  onLoad={() => handleImageLoad(`featured-${featuredNews.id}`)}
+                  loading="lazy"
+                />
+              </div>
             </div>
             <div className="md:w-3/5 p-4">
               <span className="bg-red-600 text-white px-2 py-1 rounded text-xs font-medium mb-2 inline-block">
-                {featuredNews.category}
+                {featuredNews.category || "Tin Tức"}
               </span>
               <h2 className="text-lg font-bold text-gray-800 mb-2">
                 {featuredNews.title}
@@ -83,11 +109,22 @@ const NewsSection = ({ news }) => {
               key={item.id}
               className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition duration-300"
             >
-              <div className="h-36 bg-gray-50">
+              <div className="h-36 bg-gray-100 relative">
+                {!imageLoaded[`news-${item.id}`] && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-5 h-5 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  </div>
+                )}
                 <img
                   src={item.image}
                   alt={item.title}
-                  className="w-full h-full object-contain p-2"
+                  className={`w-full h-full object-scale-down p-1 bg-gray-50 ${
+                    !imageLoaded[`news-${item.id}`]
+                      ? "opacity-0"
+                      : "opacity-100"
+                  } transition-opacity duration-200`}
+                  onLoad={() => handleImageLoad(`news-${item.id}`)}
+                  loading="lazy"
                 />
               </div>
               <div className="p-3">
