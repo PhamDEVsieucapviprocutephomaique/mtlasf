@@ -585,7 +585,7 @@ const Admin = () => {
                 {/* PHẦN UPLOAD ẢNH */}
                 <div className="mb-4 p-4 border-2 border-dashed border-gray-300 rounded-lg">
                   <label className="block text-sm font-medium mb-2">
-                    Ảnh sản phẩm * (Tối đa 10 ảnh)
+                    Ảnh sản phẩm *
                   </label>
 
                   {/* Input chọn file */}
