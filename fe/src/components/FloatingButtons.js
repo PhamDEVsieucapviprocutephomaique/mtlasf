@@ -8,12 +8,15 @@ const FloatingButtons = () => {
         href="https://zalo.me/0969745670"
         target="_blank"
         rel="noopener noreferrer"
-        className="w-14 h-14 bg-blue-500 rounded-full shadow-xl flex items-center justify-center text-white text-2xl hover:bg-blue-600 transition duration-300 animate-pulse block"
+        className="w-12.5 h-14 bg-[#0068FF] rounded-xl shadow-xl flex items-center justify-center text-white hover:bg-[#0055D4] transition duration-300 animate-pulse block"
         title="Chat Zalo"
       >
-        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-6h2v6zm4 0h-2v-6h2v6zm-5-8c0-.55.45-1 1-1s1 .45 1 1-.45 1-1 1-1-.45-1-1z" />
-        </svg>
+        {/* Logo Zalo trắng chiếm gần hết */}
+        <div className="w-11 h-11 bg-white rounded-lg flex items-center justify-center">
+          <span className="text-[#0068FF] font-bold text-1xl leading-none">
+            Zalo
+          </span>
+        </div>
       </a>
 
       {/* Facebook Button */}

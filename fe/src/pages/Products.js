@@ -14,8 +14,7 @@ const Products = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // const API_BASE_URL = "http://api.thanhdanhluxury.vn/api";
-  const API_BASE_URL = "http://localhost:8000/api";
+  const API_BASE_URL = "http://api.thanhdanhluxury.vn/api";
 
   // Kiểm tra trạng thái đăng nhập admin
   useEffect(() => {

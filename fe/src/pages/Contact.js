@@ -1,9 +1,10 @@
 import React from "react";
+import anh from "../image/anhdiachi.png";
 
 const Contact = () => {
   const handleMapClick = () => {
     window.open(
-      "https://www.google.com/maps/search/h%E1%BB%8Dc+vi%E1%BB%87n+c%C3%B4ng+ngh%E1%BB%87+b%C6%B0u+ch%C3%ADnh+vi%E1%BB%85n+th%C3%B4ng+/@20.9813479,105.7914022,14z/data=!3m1!4b1?hl=vi&entry=ttu&g_ep=EgoyMDI1MTExNy4wIKXMDSoASAFQAw%3D%3D",
+      "https://www.google.com/maps/place/Ng.+143+%C4%90.+Xu%C3%A2n+Ph%C6%B0%C6%A1ng,+H%C3%A0+N%E1%BB%99i,+Vi%E1%BB%87t+Nam/@21.0356365,105.7391554,17z/data=!3m1!4b1!4m6!3m5!1s0x3134548bfe9279e1:0x719b1ca457a12f54!8m2!3d21.0356365!4d105.7417357!16s%2Fg%2F11bymxvfnz?entry=ttu&g_ep=EgoyMDI1MTExNy4wIKXMDSoASAFQAw%3D%3D",
       "_blank"
     );
   };
@@ -17,6 +18,7 @@ const Contact = () => {
           {/* THÔNG TIN LIÊN HỆ */}
           <div>
             <h2 className="text-2xl font-bold text-blue-800 mb-6">
+              <br></br>
               THÔNG TIN LIÊN HỆ
             </h2>
 
@@ -27,7 +29,9 @@ const Contact = () => {
                 </div>
                 <div>
                   <h3 className="font-bold text-lg">Địa chỉ</h3>
-                  <p className="text-gray-600">Học asfdjsfajsfahsdkfjnaf</p>
+                  <p className="text-gray-600">
+                    143 Xuân Phương, Hà Nội, Việt Nam
+                  </p>
                 </div>
               </div>
 
@@ -67,18 +71,24 @@ const Contact = () => {
               <h3 className="font-bold text-lg mb-4">Bản đồ</h3>
               <div
                 onClick={handleMapClick}
-                className="h-64 bg-gradient-to-br from-blue-200 to-blue-300 rounded-lg flex items-center justify-center cursor-pointer hover:from-blue-300 hover:to-blue-400 transition duration-300"
+                className="h-64 rounded-lg overflow-hidden cursor-pointer hover:opacity-90 transition duration-300"
               >
-                <span className="text-blue-800 font-medium text-center">
-                  Click để xem bản đồ Google Maps
-                </span>
+                <img
+                  src={anh}
+                  alt="Bản đồ địa chỉ Thanhdanhluxury"
+                  className="w-full h-full object-cover"
+                />
               </div>
+              <p className="text-center text-gray-600 mt-2">
+                Click vào ảnh để xem bản đồ Google Maps
+              </p>
             </div>
           </div>
 
           {/* GIỚI THIỆU VỀ THANHDANHLUXURY */}
           <div>
             <h2 className="text-2xl font-bold text-blue-800 mb-6">
+              <br></br>
               VỀ THANHDANHLUXURY
             </h2>
             <div className="bg-white p-8 rounded-lg shadow-md border border-gray-200">

@@ -6,8 +6,7 @@ const HeroSlider = () => {
   const [slides, setSlides] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // const API_BASE_URL = "http://api.thanhdanhluxury.vn/api";
-  const API_BASE_URL = "http://localhost:8000/api";
+  const API_BASE_URL = "http://api.thanhdanhluxury.vn/api";
 
   // Fetch banners từ API
   useEffect(() => {
@@ -125,12 +124,12 @@ const HeroSlider = () => {
                   {slide.subtitle}
                 </p>
               )}
-              <Link
+              {/* <Link
                 to="/san-pham"
                 className="inline-block bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-6 sm:py-3 sm:px-10 md:py-4 md:px-16 rounded-lg text-sm sm:text-base md:text-lg lg:text-xl transition duration-300 shadow-2xl hover:shadow-red-600/50"
               >
                 KHÁM PHÁ NGAY
-              </Link>
+              </Link> */}
             </div>
           </div>
         </div>

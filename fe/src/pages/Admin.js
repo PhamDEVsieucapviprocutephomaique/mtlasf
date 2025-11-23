@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
-// --- COMPONENT MODAL CHI TIẾT ĐƠN HÀNG ---
+// === MODAL CHI TIẾT ĐƠN HÀNG ===
 const OrderDetailModal = ({ order, isOpen, onClose }) => {
   if (!isOpen || !order) return null;
   const items = order.items || [];
@@ -93,27 +93,23 @@ const OrderDetailModal = ({ order, isOpen, onClose }) => {
   );
 };
 
-// --- COMPONENT CHÍNH ADMIN ---
+// === COMPONENT CHÍNH ADMIN ===
 const Admin = () => {
   const navigate = useNavigate();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [loginForm, setLoginForm] = useState({ username: "", password: "" });
   const [loginError, setLoginError] = useState("");
-
   const [activeTab, setActiveTab] = useState("add-product");
+
   const [orders, setOrders] = useState([]);
   const [brands, setBrands] = useState([]);
   const [categories, setCategories] = useState([]);
-  const [banners, setBanners] = useState([]); // Đảm bảo khởi tạo là array rỗng
+  const [banners, setBanners] = useState([]);
+  const [news, setNews] = useState([]);
   const [youtubeUrl, setYoutubeUrl] = useState("");
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState(null);
-
-  const [selectedFiles, setSelectedFiles] = useState([]);
-  const [previewUrls, setPreviewUrls] = useState([]);
-  const [isUploading, setIsUploading] = useState(false);
-  const [uploadedImageUrls, setUploadedImageUrls] = useState([]);
 
   const [newProduct, setNewProduct] = useState({
     name: "",
@@ -124,7 +120,6 @@ const Admin = () => {
     images: [],
   });
 
-  // State cho Banner
   const [newBanner, setNewBanner] = useState({
     title: "",
     content: "",
@@ -132,8 +127,14 @@ const Admin = () => {
   });
   const [bannerImageUrl, setBannerImageUrl] = useState("");
 
-  // const API_BASE_URL = "http://api.thanhdanhluxury.vn/api";
-  const API_BASE_URL = "http://localhost:8000/api";
+  const [newNews, setNewNews] = useState({
+    title: "",
+    content: "",
+    image_url: "",
+  });
+  const [newsImageUrl, setNewsImageUrl] = useState("");
+
+  const API_BASE_URL = "http://api.thanhdanhluxury.vn/api";
 
   useEffect(() => {
     const adminLoggedIn = localStorage.getItem("adminLoggedIn") === "true";
@@ -166,6 +167,7 @@ const Admin = () => {
       fetchOrders();
       fetchBrandsAndCategories();
       fetchBanners();
+      fetchNews();
       fetchYoutubeUrl();
     }
   }, [isLoggedIn]);
@@ -208,15 +210,13 @@ const Admin = () => {
       const categoriesData = await categoriesResponse.json();
       setCategories(categoriesData);
 
-      if (brandsData.length > 0) {
+      if (brandsData.length > 0)
         setNewProduct((prev) => ({ ...prev, brand_id: brandsData[0].id }));
-      }
-      if (categoriesData.length > 0) {
+      if (categoriesData.length > 0)
         setNewProduct((prev) => ({
           ...prev,
           category_id: categoriesData[0].id,
         }));
-      }
     } catch (error) {
       console.error("Lỗi khi lấy brands/categories:", error);
     }
@@ -226,16 +226,23 @@ const Admin = () => {
     try {
       const response = await fetch(`${API_BASE_URL}/banners`);
       const data = await response.json();
-      // Đảm bảo data là array và reverse để banner mới nhất ở cuối
-      if (Array.isArray(data)) {
-        setBanners(data); // Giữ nguyên thứ tự từ API (cũ -> mới)
-      } else {
-        console.error("Dữ liệu banners không phải array:", data);
-        setBanners([]);
-      }
+      if (Array.isArray(data)) setBanners(data);
+      else setBanners([]);
     } catch (error) {
       console.error("Lỗi khi lấy banners:", error);
       setBanners([]);
+    }
+  };
+
+  const fetchNews = async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/news`);
+      const data = await response.json();
+      if (Array.isArray(data)) setNews(data);
+      else setNews([]);
+    } catch (error) {
+      console.error("Lỗi khi lấy tin tức:", error);
+      setNews([]);
     }
   };
 
@@ -249,82 +256,60 @@ const Admin = () => {
     }
   };
 
-  const handleFileSelect = (e) => {
+  // === UPLOAD ẢNH SẢN PHẨM (TỰ ĐỘNG) ===
+  const handleUploadProductImages = async (e) => {
     const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+
     if (files.length > 10) {
       alert("Chỉ được chọn tối đa 10 ảnh!");
       return;
     }
+
     const validFiles = files.filter((file) => file.type.startsWith("image/"));
     if (validFiles.length !== files.length) {
       alert("Chỉ được chọn file ảnh!");
       return;
     }
-    setSelectedFiles(validFiles);
-    const previews = validFiles.map((file) => URL.createObjectURL(file));
-    setPreviewUrls(previews);
-  };
 
-  const handleRemovePreview = (index) => {
-    const newFiles = selectedFiles.filter((_, i) => i !== index);
-    const newPreviews = previewUrls.filter((_, i) => i !== index);
-    URL.revokeObjectURL(previewUrls[index]);
-    setSelectedFiles(newFiles);
-    setPreviewUrls(newPreviews);
-  };
-
-  const handleUploadImages = async () => {
-    if (selectedFiles.length === 0) {
-      alert("Vui lòng chọn ảnh trước khi upload!");
-      return;
-    }
-    setIsUploading(true);
     try {
       const formData = new FormData();
-      selectedFiles.forEach((file) => {
-        formData.append("files", file);
-      });
+      validFiles.forEach((file) => formData.append("files", file));
+
       const response = await fetch(`${API_BASE_URL}/upload/multiple`, {
         method: "POST",
         body: formData,
       });
+
       if (response.ok) {
         const result = await response.json();
         if (result.success) {
           const urls = result.uploaded.map((item) => item.url);
-          setUploadedImageUrls(urls);
-          setNewProduct((prev) => ({ ...prev, images: urls }));
+          setNewProduct((prev) => ({
+            ...prev,
+            images: [...prev.images, ...urls],
+          }));
           alert(`✅ Upload thành công ${result.total_uploaded} ảnh!`);
-          previewUrls.forEach((url) => URL.revokeObjectURL(url));
-          setSelectedFiles([]);
-          setPreviewUrls([]);
         } else {
-          alert(
-            "❌ Upload thất bại: " +
-              (result.errors ? result.errors.join(", ") : "Unknown error")
-          );
+          alert("❌ Upload thất bại");
         }
       } else {
-        const error = await response.json();
-        alert("❌ Lỗi upload: " + (error.detail || "Không thể upload"));
+        alert("❌ Lỗi khi upload ảnh");
       }
     } catch (error) {
-      console.error("Lỗi khi upload ảnh:", error);
+      console.error("Lỗi upload:", error);
       alert("❌ Lỗi kết nối khi upload ảnh!");
-    } finally {
-      setIsUploading(false);
     }
   };
 
-  const handleRemoveUploadedImage = (index) => {
-    const newUrls = uploadedImageUrls.filter((_, i) => i !== index);
-    setUploadedImageUrls(newUrls);
-    setNewProduct((prev) => ({ ...prev, images: newUrls }));
+  const handleRemoveProductImage = (index) => {
+    const newImages = newProduct.images.filter((_, i) => i !== index);
+    setNewProduct((prev) => ({ ...prev, images: newImages }));
   };
 
   const handleAddProduct = async (e) => {
     e.preventDefault();
-    if (uploadedImageUrls.length === 0) {
+    if (newProduct.images.length === 0) {
       alert("Vui lòng upload ít nhất 1 ảnh cho sản phẩm!");
       return;
     }
@@ -334,7 +319,7 @@ const Admin = () => {
       category_id: parseInt(newProduct.category_id),
       price: parseFloat(newProduct.price),
       description: newProduct.description,
-      images: uploadedImageUrls,
+      images: newProduct.images,
     };
     if (
       !productData.brand_id ||
@@ -362,9 +347,6 @@ const Admin = () => {
           description: "",
           images: [],
         });
-        setUploadedImageUrls([]);
-        setSelectedFiles([]);
-        setPreviewUrls([]);
       } else {
         const error = await response.json();
         alert(
@@ -458,6 +440,86 @@ const Admin = () => {
     }
   };
 
+  // === TIN TỨC FUNCTIONS ===
+  const handleUploadNewsImage = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    if (!file.type.startsWith("image/")) {
+      alert("Chỉ được chọn file ảnh!");
+      return;
+    }
+    const formData = new FormData();
+    formData.append("file", file);
+    try {
+      const response = await fetch(`${API_BASE_URL}/upload`, {
+        method: "POST",
+        body: formData,
+      });
+      if (response.ok) {
+        const result = await response.json();
+        setNewsImageUrl(result.url);
+        alert("✅ Upload ảnh tin tức thành công!");
+      } else {
+        alert("❌ Lỗi upload ảnh tin tức");
+      }
+    } catch (error) {
+      console.error("Lỗi upload:", error);
+      alert("❌ Lỗi kết nối");
+    }
+  };
+
+  const handleAddNews = async (e) => {
+    e.preventDefault();
+    if (!newsImageUrl) {
+      alert("Vui lòng upload ảnh tin tức!");
+      return;
+    }
+    if (!newNews.title || !newNews.content) {
+      alert("Vui lòng nhập đầy đủ tiêu đề và nội dung!");
+      return;
+    }
+    try {
+      const response = await fetch(`${API_BASE_URL}/news`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: newNews.title,
+          content: newNews.content,
+          images: [newsImageUrl],
+        }),
+      });
+      if (response.ok) {
+        alert("✅ Thêm tin tức thành công!");
+        setNewNews({ title: "", content: "", image_url: "" });
+        setNewsImageUrl("");
+        fetchNews();
+      } else {
+        alert("❌ Lỗi khi thêm tin tức");
+      }
+    } catch (error) {
+      console.error("Lỗi:", error);
+      alert("❌ Lỗi kết nối");
+    }
+  };
+
+  const handleDeleteNews = async (newsId) => {
+    if (!window.confirm("Bạn có chắc muốn xóa tin tức này?")) return;
+    try {
+      const response = await fetch(`${API_BASE_URL}/news/${newsId}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        alert("✅ Xóa tin tức thành công!");
+        fetchNews();
+      } else {
+        alert("❌ Lỗi khi xóa tin tức");
+      }
+    } catch (error) {
+      console.error("Lỗi:", error);
+      alert("❌ Lỗi kết nối");
+    }
+  };
+
   // === YOUTUBE URL FUNCTION ===
   const handleUpdateYoutubeUrl = async (e) => {
     e.preventDefault();
@@ -536,7 +598,6 @@ const Admin = () => {
   return (
     <div className="min-h-screen bg-gray-50 pt-28 md:pt-32 pb-6">
       <div className="container mx-auto px-4 max-w-7xl">
-        {/* Layout: Sidebar + Content */}
         <div className="flex flex-col lg:flex-row gap-6">
           {/* SIDEBAR */}
           <div className="lg:w-64 flex-shrink-0">
@@ -584,6 +645,16 @@ const Admin = () => {
                   }`}
                 >
                   Thay đổi Popup
+                </button>
+                <button
+                  onClick={() => setActiveTab("news")}
+                  className={`w-full text-left px-4 py-3 rounded-lg transition ${
+                    activeTab === "news"
+                      ? "bg-blue-800 text-white font-semibold"
+                      : "bg-gray-100 hover:bg-gray-200 text-gray-700"
+                  }`}
+                >
+                  Quản lý Tin tức
                 </button>
                 <button
                   onClick={handleLogout}
@@ -684,66 +755,35 @@ const Admin = () => {
                       className="w-full p-3 border rounded-lg"
                     />
                   </div>
+
+                  {/* PHẦN ẢNH SẢN PHẨM - TỰ ĐỘNG UPLOAD */}
                   <div className="mb-4 p-4 border-2 border-dashed rounded-lg">
                     <label className="block text-sm font-medium mb-2">
-                      Ảnh sản phẩm *
+                      Ảnh sản phẩm
                     </label>
                     <input
                       type="file"
                       multiple
                       accept="image/*"
-                      onChange={handleFileSelect}
+                      onChange={handleUploadProductImages}
                       className="w-full p-2 border rounded-lg mb-2"
                     />
-                    {previewUrls.length > 0 && (
-                      <div className="mb-3">
+                    {newProduct.images.length > 0 && (
+                      <div className="mt-4">
                         <p className="text-sm font-medium mb-2">
-                          Preview ({previewUrls.length} ảnh):
+                          Ảnh đã upload ({newProduct.images.length} ảnh):
                         </p>
-                        <div className="grid grid-cols-4 gap-2">
-                          {previewUrls.map((url, index) => (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          {newProduct.images.map((url, index) => (
                             <div key={index} className="relative">
                               <img
                                 src={url}
-                                alt={`Preview ${index + 1}`}
-                                className="w-full h-20 object-cover rounded"
+                                alt={`Product ${index + 1}`}
+                                className="w-full h-24 object-cover rounded border-2 border-green-500"
                               />
                               <button
                                 type="button"
-                                onClick={() => handleRemovePreview(index)}
-                                className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
-                              >
-                                ✕
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                        <button
-                          type="button"
-                          onClick={handleUploadImages}
-                          disabled={isUploading}
-                          className="mt-2 w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg"
-                        >
-                          {isUploading ? "Đang upload..." : "Upload ảnh"}
-                        </button>
-                      </div>
-                    )}
-                    {uploadedImageUrls.length > 0 && (
-                      <div>
-                        <p className="text-sm font-medium mb-2 text-green-600">
-                          ✅ Đã upload {uploadedImageUrls.length} ảnh:
-                        </p>
-                        <div className="grid grid-cols-4 gap-2">
-                          {uploadedImageUrls.map((url, index) => (
-                            <div key={index} className="relative">
-                              <img
-                                src={url}
-                                alt={`Uploaded ${index + 1}`}
-                                className="w-full h-20 object-cover rounded border-2 border-green-500"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => handleRemoveUploadedImage(index)}
+                                onClick={() => handleRemoveProductImage(index)}
                                 className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs"
                               >
                                 ✕
@@ -754,9 +794,10 @@ const Admin = () => {
                       </div>
                     )}
                   </div>
+
                   <button
                     type="submit"
-                    className="w-full bg-blue-800 text-white py-3 rounded-lg hover:bg-blue-900"
+                    className="w-full bg-blue-800 text-white py-3 rounded-lg hover:bg-blue-900 transition font-semibold"
                   >
                     Thêm Sản Phẩm
                   </button>
@@ -828,8 +869,6 @@ const Admin = () => {
                 <h2 className="text-2xl font-bold mb-6 text-blue-800">
                   Quản lý Banner
                 </h2>
-
-                {/* Form thêm banner */}
                 <form
                   onSubmit={handleAddBanner}
                   className="mb-8 p-4 bg-gray-50 rounded-lg border"
@@ -895,8 +934,6 @@ const Admin = () => {
                     </button>
                   </div>
                 </form>
-
-                {/* Danh sách banner */}
                 <div>
                   <h3 className="text-lg font-bold mb-4">
                     Danh sách Banner ({banners.length})
@@ -982,6 +1019,121 @@ const Admin = () => {
                     Cập nhật Link Youtube
                   </button>
                 </form>
+              </div>
+            )}
+
+            {/* Quản lý Tin tức */}
+            {activeTab === "news" && (
+              <div className="bg-white p-6 rounded-lg shadow-lg">
+                <h2 className="text-2xl font-bold mb-6 text-blue-800">
+                  Quản lý Tin tức
+                </h2>
+                <form
+                  onSubmit={handleAddNews}
+                  className="mb-8 p-4 bg-gray-50 rounded-lg border"
+                >
+                  <h3 className="text-lg font-bold mb-4">Thêm Tin tức Mới</h3>
+                  <div className="space-y-4">
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Tiêu đề *
+                      </label>
+                      <input
+                        type="text"
+                        value={newNews.title}
+                        onChange={(e) =>
+                          setNewNews({ ...newNews, title: e.target.value })
+                        }
+                        className="w-full p-3 border rounded-lg"
+                        placeholder="Nhập tiêu đề tin tức..."
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Nội dung *
+                      </label>
+                      <textarea
+                        value={newNews.content}
+                        onChange={(e) =>
+                          setNewNews({ ...newNews, content: e.target.value })
+                        }
+                        rows="5"
+                        className="w-full p-3 border rounded-lg"
+                        placeholder="Nhập nội dung tin tức..."
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium mb-1">
+                        Ảnh Tin tức *
+                      </label>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleUploadNewsImage}
+                        className="w-full p-2 border rounded-lg mb-2"
+                      />
+                      {newsImageUrl && (
+                        <div className="mt-2">
+                          <img
+                            src={newsImageUrl}
+                            alt="News preview"
+                            className="w-full max-w-md h-48 object-cover rounded border-2 border-green-500"
+                          />
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full bg-blue-800 hover:bg-blue-900 text-white py-3 rounded-lg font-semibold"
+                    >
+                      Thêm Tin tức
+                    </button>
+                  </div>
+                </form>
+                <div>
+                  <h3 className="text-lg font-bold mb-4">
+                    Danh sách Tin tức ({news.length})
+                  </h3>
+                  {news.length === 0 ? (
+                    <p className="text-center text-gray-500 py-6">
+                      Chưa có tin tức nào
+                    </p>
+                  ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      {news.map((item) => (
+                        <div
+                          key={item.id}
+                          className="border rounded-lg p-4 bg-white shadow hover:shadow-lg transition relative"
+                        >
+                          <button
+                            onClick={() => handleDeleteNews(item.id)}
+                            className="absolute -top-2 -right-2 bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold hover:bg-red-700"
+                          >
+                            ✕
+                          </button>
+                          {item.images && item.images[0] && (
+                            <img
+                              src={item.images[0]}
+                              alt={item.title}
+                              className="w-full h-40 object-cover rounded mb-3"
+                            />
+                          )}
+                          <h4 className="font-bold text-lg mb-2">
+                            {item.title}
+                          </h4>
+                          <p className="text-gray-600 text-sm line-clamp-3">
+                            {item.content}
+                          </p>
+                          <p className="text-xs text-gray-400 mt-2">
+                            ID: {item.id}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             )}
           </div>

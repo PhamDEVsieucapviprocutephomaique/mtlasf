@@ -51,21 +51,28 @@ const Header = ({ onCartClick }) => {
 
   return (
     <>
-      <header className="bg-white shadow-md fixed top-0 left-0 right-0 z-50">
+      <header
+        className="bg-white shadow-md fixed top-0 left-0 right-0 z-50"
+        style={{
+          height: "auto",
+          minHeight: "80px",
+        }}
+      >
         <div className="container mx-auto px-4 py-3">
           <div className="flex justify-between items-center">
             {/* Logo */}
-            <Link
-              to="/"
-              onClick={handleLinkClick}
-              className="text-3xl font-bold text-blue-800"
-            >
-              Thanhdanhluxury
+            <Link to="/" className="flex flex-col">
+              <span className="text-lg md:text-xl font-bold text-blue-800 leading-tight">
+                THÀNH DANH LUXURY
+              </span>
+              <span className="text-sm md:text-sm text-blue-600 font-medium mt-1">
+                Đại lý phân phối sơn, thạch cao chính hãng
+              </span>
             </Link>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:block">
-              <ul className="flex space-x-8">
+            {/* Desktop Navigation - chỉ hiển thị từ lg */}
+            <nav className="hidden lg:block">
+              <ul className="flex space-x-6 xl:space-x-8">
                 <li>
                   <Link
                     to="/"
@@ -124,6 +131,56 @@ const Header = ({ onCartClick }) => {
               </ul>
             </nav>
 
+            {/* Tablet Navigation - hiển thị từ md đến lg */}
+            <nav className="hidden md:block lg:hidden">
+              <ul className="flex space-x-4">
+                <li>
+                  <Link
+                    to="/"
+                    onClick={handleLinkClick}
+                    className={`${isActive(
+                      "/"
+                    )} transition duration-300 text-base`}
+                  >
+                    Trang chủ
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/san-pham"
+                    onClick={handleLinkClick}
+                    className={`${isActive(
+                      "/san-pham"
+                    )} transition duration-300 text-base`}
+                  >
+                    Sản phẩm
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/tin-tuc"
+                    onClick={handleLinkClick}
+                    className={`${isActive(
+                      "/tin-tuc"
+                    )} transition duration-300 text-base`}
+                  >
+                    Tin tức
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    to="/lien-he"
+                    onClick={handleLinkClick}
+                    className={`${isActive(
+                      "/lien-he"
+                    )} transition duration-300 text-base`}
+                  >
+                    Liên hệ
+                  </Link>
+                </li>
+              </ul>
+            </nav>
+
             {/* Search & Cart & Hamburger */}
             <div className="flex items-center space-x-4">
               {/* Cart Icon */}
@@ -149,14 +206,14 @@ const Header = ({ onCartClick }) => {
                 </span>
               </button>
 
-              {/* Search Form */}
-              <form onSubmit={handleSearch} className="hidden md:flex">
+              {/* Search Form - chỉ hiển thị từ lg */}
+              <form onSubmit={handleSearch} className="hidden lg:flex">
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Tìm kiếm sản phẩm..."
-                  className="px-4 py-2 border border-gray-300 rounded-l-lg focus:border-blue-800 w-64 outline-none"
+                  className="px-4 py-2 border border-gray-300 rounded-l-lg focus:border-blue-800 w-56 xl:w-64 outline-none"
                 />
                 <button
                   type="submit"
@@ -166,7 +223,7 @@ const Header = ({ onCartClick }) => {
                 </button>
               </form>
 
-              {/* Hamburger Menu */}
+              {/* Hamburger Menu - ẩn từ md */}
               <button
                 className="md:hidden text-3xl text-gray-700"
                 onClick={toggleMenu}
@@ -176,7 +233,7 @@ const Header = ({ onCartClick }) => {
             </div>
           </div>
 
-          {/* Mobile Search */}
+          {/* Mobile Search - chỉ hiển thị dưới md */}
           <form onSubmit={handleSearch} className="md:hidden mt-3 flex">
             <input
               type="text"
@@ -195,6 +252,8 @@ const Header = ({ onCartClick }) => {
         </div>
       </header>
 
+      {/* Spacer để tránh bị header che nội dung */}
+
       {/* Mobile Menu */}
       {isMenuOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
@@ -202,7 +261,7 @@ const Header = ({ onCartClick }) => {
             className="absolute inset-0 bg-black bg-opacity-70"
             onClick={toggleMenu}
           ></div>
-          <div className="absolute top-0 right-0 h-full w-80 bg-white shadow-2xl">
+          <div className="absolute top-0 right-0 h-full w-80 bg-blue-500 shadow-2xl">
             <div className="p-6">
               <button
                 className="absolute top-6 right-6 text-3xl text-gray-700"

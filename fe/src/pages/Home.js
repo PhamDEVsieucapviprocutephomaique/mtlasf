@@ -10,9 +10,7 @@ const Home = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // const API_BASE_URL = "http://api.thanhdanhluxury.vn/api";
-  const API_BASE_URL = "http://localhost:8000/api";
-
+  const API_BASE_URL = "http://api.thanhdanhluxury.vn/api";
   // Data tin tức (Giữ nguyên)
   const news = [
     {
@@ -208,9 +206,7 @@ const Home = () => {
   if (isLoading) {
     return (
       <div className="pt-24 py-12 min-h-screen flex items-center justify-center bg-gray-50">
-        <p className="text-xl text-blue-600 font-medium">
-          Đang tải dữ liệu trang chủ...
-        </p>
+        <p className="text-xl text-blue-600 font-medium">Thành Danh luxury</p>
       </div>
     );
   }
@@ -219,8 +215,7 @@ const Home = () => {
     return (
       <div className="pt-24 py-12 min-h-screen flex items-center justify-center bg-gray-50">
         <p className="text-xl text-red-700 font-medium">
-          Không thể tải dữ liệu Hãng Sơn và Sản phẩm. Vui lòng kiểm tra API
-          Backend.
+          Mạng đang gặp sự cố, vui lòng tải lại trang
         </p>
       </div>
     );

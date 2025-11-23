@@ -132,8 +132,7 @@ const Admin = () => {
   });
   const [bannerImageUrl, setBannerImageUrl] = useState("");
 
-  // const API_BASE_URL = "http://api.thanhdanhluxury.vn/api";
-  const API_BASE_URL = "http://localhost:8000/api";
+  const API_BASE_URL = "http://api.thanhdanhluxury.vn/api";
 
   useEffect(() => {
     const adminLoggedIn = localStorage.getItem("adminLoggedIn") === "true";

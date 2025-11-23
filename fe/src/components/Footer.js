@@ -14,9 +14,9 @@ const Footer = () => {
               DULUX, TOA, SIKA, NIPPON, MYLAN, MAXILITE, SEAMASTER, BOSS.
             </p>
             <div className="text-blue-200">
-              <p>số 123 thanh danh ha nội</p>
+              <p>số 143 xuân phương, hà nội</p>
               <p>0969745670</p>
-              <p> thanhdanhluxury@gmail.com</p>
+              <p> thanhdanhluxury</p>
             </div>
           </div>
 
