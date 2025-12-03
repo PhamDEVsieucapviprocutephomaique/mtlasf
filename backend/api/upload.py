@@ -1,11 +1,82 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException
 from typing import List
-from core.ftp_client import FTPClient
+import uuid
+import ftplib
+from PIL import Image
+import io
 
 router = APIRouter()
 
-@router.post("/")
-async def upload_image(file: UploadFile = File(...)):
+
+class FTPClient:
+    """Client để upload ảnh lên FTP server"""
+    
+    def __init__(self):
+        self.host = "202.92.5.48"
+        self.port = 21
+        self.username = "rvcavnufhosting_uploadanh"
+        self.password = "123456aA@"
+        self.ftp_upload_dir = "/"
+        self.web_access_url = "http://image.checkgdtg.vn/"
+    
+    async def optimize_image(self, file: UploadFile) -> tuple[bytes, str]:
+        """Tối ưu ảnh: resize + compress + convert WebP"""
+        try:
+            image_data = await file.read()
+            image = Image.open(io.BytesIO(image_data))
+            
+            # Xoay ảnh đúng hướng nếu có EXIF
+            from PIL import ImageOps
+            image = ImageOps.exif_transpose(image)
+            
+            # Resize nếu ảnh quá lớn (max 1200px)
+            max_size = 1200
+            if max(image.size) > max_size:
+                image.thumbnail((max_size, max_size), Image.Resampling.LANCZOS)
+            
+            # Convert sang WebP và compress
+            output = io.BytesIO()
+            image.save(output, format='WEBP', quality=80, optimize=True)
+            
+            return output.getvalue(), 'webp'
+            
+        except Exception as e:
+            print(f"⚠️ Image optimization error: {e}")
+            await file.seek(0)
+            return await file.read(), file.filename.split('.')[-1]
+    
+    async def upload_image(self, file: UploadFile) -> str:
+        """Upload ảnh lên FTP server"""
+        try:
+            print("🖼️ Optimizing image...")
+            optimized_data, ext = await self.optimize_image(file)
+            
+            print("📡 Connecting to FTP...")
+            ftp = ftplib.FTP()
+            ftp.connect(self.host, self.port)
+            ftp.login(self.username, self.password)
+            ftp.cwd(self.ftp_upload_dir)
+            
+            # Tạo tên file unique
+            filename = f"scam_{uuid.uuid4()}.{ext}"
+            print(f"⬆️ Uploading optimized image: {filename}")
+            
+            # Upload
+            bio = io.BytesIO(optimized_data)
+            ftp.storbinary(f"STOR {filename}", bio)
+            ftp.quit()
+            
+            image_url = f"{self.web_access_url}{filename}"
+            print(f"✅ Upload successful: {image_url}")
+            return image_url
+            
+        except Exception as e:
+            print(f"❌ FTP Upload error: {e}")
+            raise e
+
+
+@router.post("/single")
+async def upload_single_image(file: UploadFile = File(...)):
     """Upload một ảnh lên FTP server"""
     if not file.content_type.startswith('image/'):
         raise HTTPException(400, "Chỉ chấp nhận file ảnh")
@@ -15,7 +86,7 @@ async def upload_image(file: UploadFile = File(...)):
         image_url = await ftp_client.upload_image(file)
         
         return {
-            "success": True, 
+            "success": True,
             "url": image_url,
             "filename": image_url.split("/")[-1]
         }

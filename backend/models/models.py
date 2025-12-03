@@ -1,107 +1,211 @@
-from sqlmodel import SQLModel, Field
+from sqlmodel import SQLModel, Field, Column
 from typing import List, Optional
 from datetime import datetime
-from sqlalchemy import Column, Text
-from sqlalchemy.dialects.mysql import JSON
+from sqlalchemy import Text, JSON
+from sqlalchemy.dialects.mysql import JSON as MYSQL_JSON
 from enum import Enum
 
-# --- DỮ LIỆU CỐ ĐỊNH (CONSTANTS) CHO HÃNG VÀ LOẠI SẢN PHẨM ---
 
-# Danh sách Hãng Sản Xuất cố định (từ ảnh của bạn)
-DEFAULT_BRANDS = [
-    "SƠN JOTUN", "SƠN DULUX", "SƠN MAXILITE", "SƠN TOA", 
-    "SƠN KOVA", "SƠN NIPPON", "SƠN BẠCH TUYẾT", "SƠN JOTON", 
-    "SƠN ĐÁ HÒA BÌNH - HODASTONE", "SƠN CHỐNG THẤM RỒNG ĐEN", 
-    "SƠN SIKA", "PHỤ KIỆN THI CÔNG SƠN", "KEO CHÀ RON THÁI LAN"
-]
+# === ENUMS ===
+class ReportStatus(str, Enum):
+    PENDING = "pending"  # Chờ duyệt
+    APPROVED = "approved"  # Đã duyệt
+    REJECTED = "rejected"  # Từ chối
 
-# Danh sách Loại Sản Phẩm cố định (từ ảnh của bạn)
-DEFAULT_CATEGORIES = [
-    "Bột trét tường", "Sơn lót", "Sơn ngoại thất", "Sơn nội thất", 
-    "Sơn Dầu, sơn chống rỉ", "Sơn Chống Thấm", "Keo Chà Ron Thái Lan", 
-    "Sơn Giao Thông", "Sơn Công Nghiệp", "Sơn Hệ EPOXY", "Dung Môi Sơn"
-]
 
-# --- 1. Model cho Hãng Sản Xuất (ProductBrand) ---
+class ReportType(str, Enum):
+    ACCOUNT_SCAM = "account_scam"  # Tố cáo STK
+    WEBSITE_SCAM = "website_scam"  # Tố cáo website/link
 
-class ProductBrand(SQLModel, table=True):
-    """Model cho Hãng Sản Xuất (Dữ liệu cố định)"""
-    __tablename__ = "product_brands"
+
+class ScamCategory(str, Enum):
+    """Thể loại lừa đảo cho website/link"""
+    GDTG_MMO = "GDTG MMO"
+    FREE_FIRE = "Free Fire"
+    LIEN_QUAN = "Liên Quân"
+    ROBLOX = "Roblox"
+    FC_ONLINE = "FC Online"
+    VALORANT = "Valorant"
+    ZING_SPEED = "Zing Speed"
+    NRO = "NRO"
+    PR_STORY = "Pr Story"
+    NAP_GAME = "Nạp game"
+    MUA_GACH_THE = "Mua, gạch thẻ"
+    DV_GOOGLE = "Dv.Google"
+    DV_TIKTOK = "Dv.Tiktok"
+    DV_YOUTUBE = "Dv.Youtube"
+    DV_FACEBOOK = "Dv.Facebook"
+    DV_WECHAT = "Dv.Wechat"
+    FANPAGE_GROUP = "Fanpage, group"
+    PAYPAL = "Paypal, payoner..."
+    PUBG_MOBILE = "Pubg Mobile"
+    GAME_PASS = "Game Pass"
+    CHAT_GPT = "Tk Chat GPT - Canva Pro"
+    CAY_THUE_GAME = "Cày thuê Game"
+    TIEN_DIEN_TU = "Mua bán tiền điện tử"
+    RUT_VI_TRA_SAU = "Rút ví trả sau"
+    THIET_KE_WEB = "Thiết kế, Code web"
+    HOSTING_VPS = "Hosting, vps, domain, Proxy"
+    THANH_TOAN_CUOC = "Thanh toán cước, vocher"
+    TK_NETFLIX = "Tk Netflix, YouTube, Spotify…"
+    THE_PLAYERDUO = "Thẻ playerduo, code steam, tinder.."
+    CHUYEN_TIEN_QT = "Chuyển tiền quốc tế"
+    TAI_KHOAN_SIM = "Tài khoản, sim số đẹp"
+
+
+# === 1. BÁO CÁO TÀI KHOẢN SCAM ===
+class AccountScamReport(SQLModel, table=True):
+    """Bảng tố cáo tài khoản scam (STK, SĐT)"""
+    __tablename__ = "account_scam_reports"
     
     id: int = Field(default=None, primary_key=True)
-    name: str = Field(max_length=100, unique=True, index=True) # Tên hãng
+    
+    # Thông tin tài khoản scam
+    account_number: str = Field(max_length=50, index=True)  # STK hoặc SĐT
+    account_name: str = Field(max_length=255)  # Tên chủ TK
+    bank_name: Optional[str] = Field(default=None, max_length=100)  # Tên ngân hàng
+    facebook_link: Optional[str] = Field(default=None, max_length=500)  # Link FB
+    
+    # Bằng chứng
+    evidence_images: List[str] = Field(sa_column=Column(MYSQL_JSON), default=[])  # Danh sách URL ảnh
+    
+    # Nội dung tố cáo
+    content: str = Field(sa_column=Column(Text))  # Nội dung chi tiết
+    
+    # Người gửi tố cáo
+    reporter_name: str = Field(max_length=255)  # Họ tên người tố cáo
+    reporter_zalo: str = Field(max_length=20)  # Zalo liên hệ
+    is_victim: bool = Field(default=False)  # Có phải nạn nhân không
+    is_proxy_report: bool = Field(default=False)  # Đăng hộ trên group
+    
+    # Trạng thái
+    status: ReportStatus = Field(default=ReportStatus.PENDING)  # pending/approved/rejected
+    
+    # Thống kê
+    view_count: int = Field(default=0)  # Số lượt xem
+    comment_count: int = Field(default=0)  # Số bình luận
+    
+    # Timestamps
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    approved_at: Optional[datetime] = Field(default=None)  # Thời gian duyệt
 
-# --- 2. Model cho Loại Sản Phẩm (ProductCategory) ---
 
-class ProductCategory(SQLModel, table=True):
-    """Model cho Loại Sản Phẩm (Dữ liệu cố định)"""
-    __tablename__ = "product_categories"
+# === 2. BÁO CÁO WEBSITE/LINK SCAM ===
+class WebsiteScamReport(SQLModel, table=True):
+    """Bảng tố cáo website/link lừa đảo"""
+    __tablename__ = "website_scam_reports"
     
     id: int = Field(default=None, primary_key=True)
-    name: str = Field(max_length=100, unique=True, index=True) # Tên loại
-
-# --- 3. Model Sản Phẩm (Product) ---
-
-class Product(SQLModel, table=True):
-    """Model Sản phẩm với liên kết Brand và Category"""
-    __tablename__ = "products"
     
-    id: int = Field(default=None, primary_key=True)
-    name: str = Field(max_length=255, index=True) # Tên sản phẩm
+    # Thông tin website/link
+    url: str = Field(max_length=1000, index=True)  # URL website scam
+    category: ScamCategory = Field(index=True)  # Thể loại lừa đảo
     
-    # Liên kết Foreign Key (Sẽ chọn từ các bảng cố định trên)
-    brand_id: int = Field(foreign_key="product_brands.id", index=True) # ID Hãng sản xuất
-    category_id: int = Field(foreign_key="product_categories.id", index=True) # ID Loại sản phẩm
+    # Bằng chứng
+    evidence_images: List[str] = Field(sa_column=Column(MYSQL_JSON), default=[])
     
-    price: float
+    # Nội dung mô tả
     description: str = Field(sa_column=Column(Text))
-    images: List[str] = Field(sa_column=Column(JSON), default=[]) # List các URL ảnh
+    
+    # Email liên hệ
+    reporter_email: str = Field(max_length=255)
+    
+    # Trạng thái
+    status: ReportStatus = Field(default=ReportStatus.PENDING)
+    
+    # Thống kê
+    view_count: int = Field(default=0)
+    
+    # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+    approved_at: Optional[datetime] = Field(default=None)
 
-# --- 4. Model Đơn Hàng (Order) ---
 
-class Order(SQLModel, table=True):
-    """Model Đơn hàng, chứa thông tin khách hàng và chi tiết sản phẩm"""
-    __tablename__ = "orders"
+# === 3. BÌNH LUẬN ===
+class Comment(SQLModel, table=True):
+    """Bảng bình luận cho các báo cáo"""
+    __tablename__ = "comments"
     
     id: int = Field(default=None, primary_key=True)
-    customer_name: str = Field(max_length=255) # Tên khách hàng
-    customer_phone: str = Field(max_length=20) # Số điện thoại
-    customer_address: str = Field(sa_column=Column(Text)) # Địa chỉ chi tiết
-    items: List[dict] = Field(sa_column=Column(JSON))  # [{product_id, product_name, quantity, price, total}, ...]
-    total_price: float
+    
+    # Liên kết với báo cáo
+    report_type: ReportType  # account_scam hoặc website_scam
+    report_id: int = Field(index=True)  # ID báo cáo
+    
+    # Nội dung
+    author_name: str = Field(max_length=255)
+    content: str = Field(sa_column=Column(Text))
+    
+    # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
 
-# --- 5. Model Cài Đặt Trang Web (SiteSettings) ---
 
-class SiteSettings(SQLModel, table=True):
-    """Model Cài đặt trang web (Ví dụ: Link Youtube)"""
-    __tablename__ = "site_settings"
+# === 4. QUỸ BẢO HIỂM CS (ADMIN TRUNG GIAN) ===
+class InsuranceAdmin(SQLModel, table=True):
+    """Bảng quản lý admin trung gian (Quỹ bảo hiểm CS)"""
+    __tablename__ = "insurance_admins"
     
     id: int = Field(default=None, primary_key=True)
-    youtube_url: Optional[str] = Field(default=None, max_length=500)
+    order_number: int = Field(unique=True, index=True)  # Số thứ tự admin
+    
+    # Thông tin cá nhân
+    full_name: str = Field(max_length=255)
+    avatar_url: Optional[str] = Field(default=None, max_length=500)
+    
+    # Liên hệ
+    fb_main: Optional[str] = Field(default=None, max_length=100)  # FB chính
+    fb_backup: Optional[str] = Field(default=None, max_length=100)  # FB phụ
+    zalo: Optional[str] = Field(default=None, max_length=20)
+    website: Optional[str] = Field(default=None, max_length=500)
+    
+    # Thông tin quỹ
+    insurance_amount: float = Field(default=0)  # Số tiền quỹ bảo hiểm
+    insurance_start_date: Optional[datetime] = Field(default=None)
+    
+    # Dịch vụ cung cấp
+    services: List[str] = Field(sa_column=Column(MYSQL_JSON), default=[])
+    
+    # Thông tin tài khoản ngân hàng
+    bank_accounts: List[dict] = Field(sa_column=Column(MYSQL_JSON), default=[])
+    # Format: [{"bank": "VCB", "account_number": "xxx", "account_name": "yyy"}]
+    
+    # Trạng thái
+    is_active: bool = Field(default=True)
+    
+    # Timestamps
+    created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: datetime = Field(default_factory=datetime.utcnow)
 
-# --- 6. Model Banner ---
 
-class Banner(SQLModel, table=True):
-    """Model Banner cho trang chủ"""
-    __tablename__ = "banners"
+# === 5. THỐNG KÊ TÌM KIẾM ===
+class SearchLog(SQLModel, table=True):
+    """Bảng log tìm kiếm để thống kê"""
+    __tablename__ = "search_logs"
     
     id: int = Field(default=None, primary_key=True)
-    title: Optional[str] = Field(default=None, max_length=255)  # Tiêu đề (có thể null)
-    content: Optional[str] = Field(default=None, sa_column=Column(Text))  # Nội dung (có thể null)
-    image_url: str = Field(max_length=500)  # URL ảnh (bắt buộc)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    search_query: str = Field(max_length=500, index=True)  # Từ khóa tìm kiếm
+    search_date: datetime = Field(default_factory=datetime.utcnow, index=True)
+    ip_address: Optional[str] = Field(default=None, max_length=50)
 
-# --- 7. Model Tin Tức (News) ---
 
-class News(SQLModel, table=True):
-    """Model Tin tức"""
-    __tablename__ = "news"
+# === 6. CÀI ĐẶT HỆ THỐNG ===
+class SystemSettings(SQLModel, table=True):
+    """Bảng cài đặt hệ thống"""
+    __tablename__ = "system_settings"
     
     id: int = Field(default=None, primary_key=True)
-    title: str = Field(max_length=255)  # Tiêu đề
-    content: str = Field(sa_column=Column(Text))  # Nội dung
-    images: List[str] = Field(sa_column=Column(JSON), default=[])  # List các URL ảnh
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Thống kê tổng quan
+    total_account_scams: int = Field(default=0)  # Tổng số STK/SĐT lừa đảo
+    total_fb_scams: int = Field(default=0)  # Tổng số FB lừa đảo
+    total_comments: int = Field(default=0)  # Tổng số bình luận
+    pending_reports: int = Field(default=0)  # Số cảnh báo chờ duyệt
+    
+    # Liên kết mạng xã hội
+    facebook_group: Optional[str] = Field(default=None, max_length=500)
+    discord_link: Optional[str] = Field(default=None, max_length=500)
+    telegram_link: Optional[str] = Field(default=None, max_length=500)
+    
+    updated_at: datetime = Field(default_factory=datetime.utcnow)

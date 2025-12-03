@@ -1,114 +1,139 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from sqlmodel import Session, select
+from sqlmodel import Session
 import uvicorn
 
-# Import các components cốt lõi
-from core.database import create_db_and_tables, engine
+# Import database
+from core.database import create_db_and_tables, engine, init_default_data
 
-# Import các Models cần thiết, bao gồm cả các hằng số dữ liệu mặc định
-from models.models import (
-    SiteSettings, 
-    ProductBrand, 
-    ProductCategory, 
-    DEFAULT_BRANDS, 
-    DEFAULT_CATEGORIES
-)
-
-# Import các routers API
-from api.products import router as products_router
-from api.orders import router as orders_router
-from api.settings import router as settings_router
+# Import routers
+from api.account_reports import router as account_reports_router
+from api.website_reports import router as website_reports_router
+from api.comments import router as comments_router
+from api.insurance_admins import router as insurance_admins_router
+from api.search import router as search_router
+from api.dashboard import router as dashboard_router
 from api.upload import router as upload_router
-from api.banners import router as banners_router  # NEW
-from api.news import router as news_router  # NEW
 
-
+# Khởi tạo FastAPI app
 app = FastAPI(
-    title="Paint Store API",
-    description="API for paint selling website",
-    version="1.0.0"
+    title="CheckScam API",
+    description="API hệ thống kiểm tra & tố cáo lừa đảo",
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
-# --- Cấu hình Middleware (CORS) ---
+# === CORS Configuration ===
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*"],  # Cho phép tất cả domain (production nên giới hạn)
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# --- Thêm Routers API ---
-app.include_router(products_router, prefix="/api/products", tags=["Products"])
-app.include_router(orders_router, prefix="/api/orders", tags=["Orders"])
-app.include_router(settings_router, prefix="/api/settings", tags=["Settings"])
-app.include_router(upload_router, prefix="/api/upload", tags=["Upload"])
-app.include_router(banners_router, prefix="/api/banners", tags=["Banners"])  # NEW
-app.include_router(news_router, prefix="/api/news", tags=["News"])  # NEW
+# === Include Routers ===
+app.include_router(
+    account_reports_router,
+    prefix="/api/account-reports",
+    tags=["Tố Cáo Tài Khoản Scam"]
+)
+
+app.include_router(
+    website_reports_router,
+    prefix="/api/website-reports",
+    tags=["Tố Cáo Website Scam"]
+)
+
+app.include_router(
+    comments_router,
+    prefix="/api/comments",
+    tags=["Bình Luận"]
+)
+
+app.include_router(
+    insurance_admins_router,
+    prefix="/api/insurance-admins",
+    tags=["Quỹ Bảo Hiểm CS"]
+)
+
+app.include_router(
+    search_router,
+    prefix="/api/search",
+    tags=["Tìm Kiếm"]
+)
+
+app.include_router(
+    dashboard_router,
+    prefix="/api/dashboard",
+    tags=["Dashboard & Thống Kê"]
+)
+
+app.include_router(
+    upload_router,
+    prefix="/api/upload",
+    tags=["Upload Ảnh"]
+)
 
 
-def seed_default_data(db: Session):
-    """Thực hiện chèn dữ liệu mặc định nếu chưa tồn tại"""
-    
-    # 1. Khởi tạo Cài đặt mặc định (SiteSettings)
-    settings = db.exec(select(SiteSettings)).first()
-    if not settings:
-        print("⚙️ Tạo cài đặt mặc định...")
-        settings = SiteSettings(youtube_url=None)
-        db.add(settings)
-    
-    # 2. Khởi tạo dữ liệu Hãng Sản Xuất (ProductBrand)
-    print("🏭 Khởi tạo Hãng sản xuất...")
-    for brand_name in DEFAULT_BRANDS:
-        existing_brand = db.exec(
-            select(ProductBrand).where(ProductBrand.name == brand_name)
-        ).first()
-        if not existing_brand:
-            db.add(ProductBrand(name=brand_name))
-            
-    # 3. Khởi tạo dữ liệu Loại Sản Phẩm (ProductCategory)
-    print("🧱 Khởi tạo Loại sản phẩm...")
-    for category_name in DEFAULT_CATEGORIES:
-        existing_category = db.exec(
-            select(ProductCategory).where(ProductCategory.name == category_name)
-        ).first()
-        if not existing_category:
-            db.add(ProductCategory(name=category_name))
-
-    db.commit()
-    print("✅ Dữ liệu mặc định (Brands, Categories, Settings) đã được đảm bảo")
-
-
+# === Startup Event ===
 @app.on_event("startup")
 def on_startup():
-    print("🚀 Khởi động ứng dụng...")
+    """
+    Khởi động ứng dụng: tạo tables và dữ liệu mặc định
+    """
+    print("🚀 Khởi động CheckScam API...")
     
     print("📊 Tạo database tables...")
     create_db_and_tables()
     
-    with Session(engine) as db:
-        seed_default_data(db)
+    print("🔧 Khởi tạo dữ liệu mặc định...")
+    with Session(engine) as session:
+        init_default_data(session)
+    
+    print("✅ Hệ thống đã sẵn sàng!")
 
 
-# --- API Root và Health Check ---
-
+# === Root Endpoints ===
 @app.get("/")
 def root():
+    """
+    API Root - Thông tin hệ thống
+    """
     return {
-        "message": "Paint Store API",
+        "message": "CheckScam API - Hệ thống kiểm tra & tố cáo lừa đảo",
         "version": "1.0.0",
         "docs": "/docs",
+        "redoc": "/redoc",
         "endpoints": {
-            "products": "/api/products",
-            "orders": "/api/orders",
-            "settings": "/api/settings",
-            "banners": "/api/banners",
-            "news": "/api/news"
+            "account_reports": "/api/account-reports",
+            "website_reports": "/api/website-reports",
+            "comments": "/api/comments",
+            "insurance_admins": "/api/insurance-admins",
+            "search": "/api/search",
+            "dashboard": "/api/dashboard",
+            "upload": "/api/upload"
         }
     }
 
 
 @app.get("/health")
 def health_check():
-    return {"status": "ok"}
+    """
+    Health Check Endpoint
+    """
+    return {
+        "status": "healthy",
+        "service": "CheckScam API"
+    }
+
+
+# === Run Application ===
+if __name__ == "__main__":
+    uvicorn.run(
+        "main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True  # Auto-reload khi code thay đổi (chỉ dùng development)
+    )
