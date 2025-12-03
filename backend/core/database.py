@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # DATABASE_URL - Cập nhật theo thông tin của bạn
-DATABASE_URL = "mysql+pymysql://rpyatvvchosting_user:123456aA%40@202.92.4.66:3306/rpyatvvchosting_banson"
+DATABASE_URL = "mysql+pymysql://rvcavnufhosting_user:123456aA%40@202.92.5.48:3306/rvcavnufhosting_checkscam"
 
 print(f"DEBUG: DATABASE_URL value is: {DATABASE_URL}")
 

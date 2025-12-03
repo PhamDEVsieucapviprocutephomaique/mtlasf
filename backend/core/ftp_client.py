@@ -6,12 +6,12 @@ import io
 
 class FTPClient:
     def __init__(self):
-        self.host = "202.92.4.66"  
+        self.host = "202.92.5.48"  
         self.port = 21
-        self.username = "rpyatvvchosting_uploadanh"  
+        self.username = "rvcavnufhosting_uploadanh"  
         self.password = "123456aA@"  
         self.ftp_upload_dir = "/" 
-        self.web_access_url = "https://image.thanhdanhluxury.vn/"
+        self.web_access_url = "http://image.checkgdtg.vn/"
 
     async def optimize_image(self, file: UploadFile) -> tuple[bytes, str]:
         """Tối ưu ảnh: resize + compress + convert WebP"""
