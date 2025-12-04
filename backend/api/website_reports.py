@@ -1,14 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 from typing import List, Optional
-from datetime import datetime # <--- SỬA LỖI: Cần import datetime
+from datetime import datetime
 
 from core.database import get_session
 from models.models import WebsiteScamReport, ReportStatus, ScamCategory, SystemSettings
 from schemas.schemas import (
     WebsiteScamReportCreate,
     WebsiteScamReportResponse,
-    AccountScamReportUpdate  # Dùng chung schema update
+    AccountScamReportUpdate
 )
 
 router = APIRouter()
@@ -20,9 +20,9 @@ def create_website_report(
     db: Session = Depends(get_session)
 ):
     """
-    Tạo tố cáo website/link scam mới
+    TẠO TỐ CÁO WEBSITE/LINK SCAM MỚI
     """
-    now = datetime.utcnow() # <--- SỬA LỖI: Lấy thời gian hiện tại
+    now = datetime.utcnow()
     new_report = WebsiteScamReport(
         url=report.url,
         category=report.category,
@@ -30,8 +30,8 @@ def create_website_report(
         description=report.description,
         reporter_email=report.reporter_email,
         status=ReportStatus.PENDING,
-        created_at=now, # <--- SỬA LỖI: Gán thủ công
-        updated_at=now  # <--- SỬA LỖI: Gán thủ công
+        created_at=now,
+        updated_at=now
     )
     
     db.add(new_report)
@@ -57,7 +57,7 @@ def get_website_reports(
     db: Session = Depends(get_session)
 ):
     """
-    Lấy danh sách các tố cáo website scam
+    LẤY DANH SÁCH TỐ CÁO WEBSITE SCAM
     """
     query = select(WebsiteScamReport).order_by(WebsiteScamReport.created_at.desc())
     
@@ -73,12 +73,15 @@ def get_website_reports(
     return reports
 
 
-@router.get("/categories/list")
+@router.get("/categories")
 def get_website_categories():
     """
-    Lấy danh sách tất cả các thể loại scam cho website
+    LẤY DANH SÁCH TẤT CẢ CÁC THỂ LOẠI SCAM
     """
-    return [category.value for category in ScamCategory]
+    return {
+        "categories": [category.value for category in ScamCategory],
+        "total": len(ScamCategory)
+    }
 
 
 @router.get("/{report_id}", response_model=WebsiteScamReportResponse)
@@ -87,13 +90,13 @@ def get_website_report(
     db: Session = Depends(get_session)
 ):
     """
-    Lấy chi tiết một tố cáo website scam và tăng lượt xem
+    LẤY CHI TIẾT MỘT TỐ CÁO WEBSITE và tăng lượt xem
     """
     report = db.get(WebsiteScamReport, report_id)
     if not report:
         raise HTTPException(status_code=404, detail="Không tìm thấy báo cáo")
     
-    # Tăng lượt xem (không commit ngay, để commit chung với updated_at)
+    # Tăng lượt xem
     report.view_count += 1
     report.updated_at = datetime.utcnow()
     db.add(report)
@@ -106,11 +109,11 @@ def get_website_report(
 @router.put("/{report_id}", response_model=WebsiteScamReportResponse)
 def update_website_report(
     report_id: int,
-    report_update: AccountScamReportUpdate, # Dùng chung schema update
+    report_update: AccountScamReportUpdate,
     db: Session = Depends(get_session)
 ):
     """
-    Cập nhật trạng thái của tố cáo website (Admin)
+    CẬP NHẬT TRẠNG THÁI TỐ CÁO WEBSITE (Admin)
     """
     report = db.get(WebsiteScamReport, report_id)
     if not report:
@@ -148,7 +151,7 @@ def delete_website_report(
     db: Session = Depends(get_session)
 ):
     """
-    Xóa tố cáo website scam
+    XÓA TỐ CÁO WEBSITE SCAM
     """
     report = db.get(WebsiteScamReport, report_id)
     if not report:

@@ -9,7 +9,7 @@ router = APIRouter()
 
 
 class FTPClient:
-    """Client để upload ảnh lên FTP server"""
+    """Client để upload ảnh lên FTP server (HARDCODE - KHÔNG DÙNG .ENV)"""
     
     def __init__(self):
         self.host = "202.92.5.48"

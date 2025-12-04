@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends
 from sqlmodel import Session, select, func
 from datetime import datetime, timedelta
 
@@ -8,7 +8,8 @@ from models.models import (
     AccountScamReport,
     WebsiteScamReport,
     ReportStatus,
-    SearchLog
+    SearchLog,
+    Comment
 )
 from schemas.schemas import DashboardStats, SystemSettingsResponse, SystemSettingsUpdate
 
@@ -20,7 +21,7 @@ def get_dashboard_stats(
     db: Session = Depends(get_session)
 ):
     """
-    Lấy thống kê tổng quan cho trang chủ
+    LẤY THỐNG KÊ TỔNG QUAN CHO TRANG CHỦ
     """
     settings = db.exec(select(SystemSettings)).first()
     
@@ -60,7 +61,7 @@ def get_dashboard_stats(
         .where(AccountScamReport.created_at >= seven_days_ago)
         .group_by(AccountScamReport.account_number, AccountScamReport.account_name)
         .order_by(func.count(AccountScamReport.id).desc())
-        .limit(6)
+        .limit(10)
     )
     
     top_scammers = db.exec(top_scammers_query).all()
@@ -75,7 +76,7 @@ def get_dashboard_stats(
         .where(SearchLog.search_date < today_end)
         .group_by(SearchLog.search_query)
         .order_by(func.count(SearchLog.id).desc())
-        .limit(3)
+        .limit(10)
     )
     
     top_searches = db.exec(top_searches_query).all()
@@ -109,7 +110,7 @@ def get_system_settings(
     db: Session = Depends(get_session)
 ):
     """
-    Lấy cài đặt hệ thống
+    LẤY CÀI ĐẶT HỆ THỐNG
     """
     settings = db.exec(select(SystemSettings)).first()
     
@@ -128,7 +129,7 @@ def update_system_settings(
     db: Session = Depends(get_session)
 ):
     """
-    Cập nhật cài đặt hệ thống (link mạng xã hội)
+    CẬP NHẬT CÀI ĐẶT HỆ THỐNG (link mạng xã hội)
     """
     settings = db.exec(select(SystemSettings)).first()
     
@@ -154,7 +155,7 @@ def refresh_system_stats(
     db: Session = Depends(get_session)
 ):
     """
-    Làm mới thống kê hệ thống (đếm lại tất cả)
+    LÀM MỚI THỐNG KÊ HỆ THỐNG (đếm lại tất cả)
     """
     settings = db.exec(select(SystemSettings)).first()
     
@@ -175,7 +176,6 @@ def refresh_system_stats(
     ).one()
     
     # Đếm lại tổng số bình luận
-    from models.models import Comment
     total_comments = db.exec(select(func.count(Comment.id))).one()
     
     # Đếm số báo cáo chờ duyệt

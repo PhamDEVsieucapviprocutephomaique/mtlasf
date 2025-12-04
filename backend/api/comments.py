@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 from typing import List
-from datetime import datetime # <--- SỬA LỖI: Cần import datetime
+from datetime import datetime
 
 from core.database import get_session
 from models.models import Comment, ReportType, AccountScamReport, WebsiteScamReport, SystemSettings
@@ -18,7 +18,7 @@ def create_comment(
     db: Session = Depends(get_session)
 ):
     """
-    Tạo bình luận cho một báo cáo
+    TẠO BÌNH LUẬN cho một báo cáo (CHỈ POST - KHÔNG XÓA/SỬA)
     """
     # Kiểm tra xem báo cáo có tồn tại không
     if report_type == ReportType.ACCOUNT_SCAM:
@@ -28,29 +28,33 @@ def create_comment(
         
         # Tăng số lượng bình luận
         report.comment_count += 1
+        report.updated_at = datetime.utcnow()
         db.add(report)
         
     elif report_type == ReportType.WEBSITE_SCAM:
         report = db.get(WebsiteScamReport, report_id)
         if not report:
             raise HTTPException(status_code=404, detail="Không tìm thấy báo cáo website")
+        report.updated_at = datetime.utcnow()
+        db.add(report)
     else:
         raise HTTPException(status_code=400, detail="Loại báo cáo không hợp lệ")
     
     # Tạo bình luận mới
-    now = datetime.utcnow() # <--- SỬA LỖI: Lấy thời gian hiện tại
+    now = datetime.utcnow()
     new_comment = Comment(
         report_type=report_type,
         report_id=report_id,
         author_name=comment.author_name,
         content=comment.content,
-        created_at=now # <--- SỬA LỖI: Gán thủ công
+        created_at=now
     )
     
     # Tăng tổng số bình luận trong SystemSettings
     settings = db.exec(select(SystemSettings)).first()
     if settings:
         settings.total_comments += 1
+        settings.updated_at = datetime.utcnow()
         db.add(settings)
 
     db.add(new_comment)
@@ -69,7 +73,7 @@ def get_comments(
     db: Session = Depends(get_session)
 ):
     """
-    Lấy danh sách bình luận cho một báo cáo
+    LẤY DANH SÁCH BÌNH LUẬN cho một báo cáo (CHỈ GET)
     """
     query = (
         select(Comment)
@@ -82,36 +86,3 @@ def get_comments(
     
     comments = db.exec(query).all()
     return comments
-
-
-@router.delete("/{comment_id}")
-def delete_comment(
-    comment_id: int,
-    db: Session = Depends(get_session)
-):
-    """
-    Xóa bình luận (dành cho admin)
-    """
-    comment = db.get(Comment, comment_id)
-    if not comment:
-        raise HTTPException(status_code=404, detail="Không tìm thấy bình luận")
-    
-    # Giảm số lượng bình luận trong báo cáo
-    if comment.report_type == ReportType.ACCOUNT_SCAM:
-        report = db.get(AccountScamReport, comment.report_id)
-        if report and report.comment_count > 0:
-            report.comment_count -= 1
-            report.updated_at = datetime.utcnow()
-            db.add(report)
-    
-    # Giảm tổng số bình luận trong SystemSettings
-    settings = db.exec(select(SystemSettings)).first()
-    if settings and settings.total_comments > 0:
-        settings.total_comments -= 1
-        settings.updated_at = datetime.utcnow()
-        db.add(settings)
-        
-    db.delete(comment)
-    db.commit()
-    
-    return {"success": True, "message": f"Đã xóa bình luận ID {comment_id}"}

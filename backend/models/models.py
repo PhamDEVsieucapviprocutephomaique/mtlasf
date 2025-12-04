@@ -64,7 +64,9 @@ class AccountScamReport(SQLModel, table=True):
     account_number: str = Field(max_length=50, index=True)  # STK hoặc SĐT
     account_name: str = Field(max_length=255)  # Tên chủ TK
     bank_name: Optional[str] = Field(default=None, max_length=100)  # Tên ngân hàng
-    facebook_link: Optional[str] = Field(default=None, max_length=500)  # Link FB
+    facebook_link: Optional[str] = Field(default=None, max_length=500, index=True)  # Link FB
+    zalo_link: Optional[str] = Field(default=None, max_length=500, index=True)  # Link Zalo
+    phone_number: Optional[str] = Field(default=None, max_length=20, index=True)  # SĐT
     
     # Bằng chứng
     evidence_images: List[str] = Field(sa_column=Column(MYSQL_JSON), default=[])  # Danh sách URL ảnh
@@ -84,6 +86,8 @@ class AccountScamReport(SQLModel, table=True):
     # Thống kê
     view_count: int = Field(default=0)  # Số lượt xem
     comment_count: int = Field(default=0)  # Số bình luận
+    search_count: int = Field(default=0)  # Số lần được tìm kiếm
+    report_count: int = Field(default=1)  # Số lần bị tố cáo (đếm theo người)
     
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -116,6 +120,7 @@ class WebsiteScamReport(SQLModel, table=True):
     
     # Thống kê
     view_count: int = Field(default=0)
+    search_count: int = Field(default=0)  # Số lần được tìm kiếm
     
     # Timestamps
     created_at: datetime = Field(default_factory=datetime.utcnow)
@@ -155,9 +160,10 @@ class InsuranceAdmin(SQLModel, table=True):
     avatar_url: Optional[str] = Field(default=None, max_length=500)
     
     # Liên hệ
-    fb_main: Optional[str] = Field(default=None, max_length=100)  # FB chính
+    fb_main: Optional[str] = Field(default=None, max_length=100, index=True)  # FB chính
     fb_backup: Optional[str] = Field(default=None, max_length=100)  # FB phụ
-    zalo: Optional[str] = Field(default=None, max_length=20)
+    zalo: Optional[str] = Field(default=None, max_length=20, index=True)
+    phone: Optional[str] = Field(default=None, max_length=20, index=True)  # SĐT
     website: Optional[str] = Field(default=None, max_length=500)
     
     # Thông tin quỹ
@@ -188,6 +194,8 @@ class SearchLog(SQLModel, table=True):
     search_query: str = Field(max_length=500, index=True)  # Từ khóa tìm kiếm
     search_date: datetime = Field(default_factory=datetime.utcnow, index=True)
     ip_address: Optional[str] = Field(default=None, max_length=50)
+    found_results: bool = Field(default=False)  # Có tìm thấy kết quả không
+    result_count: int = Field(default=0)  # Số kết quả tìm được
 
 
 # === 6. CÀI ĐẶT HỆ THỐNG ===

@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select, func
 from typing import List, Optional
-from datetime import datetime, timedelta # <--- SỬA LỖI: Cần import datetime
+from datetime import datetime, timedelta
 
 from core.database import get_session
-from models.models import AccountScamReport, ReportStatus, ReportType, SystemSettings
+from models.models import AccountScamReport, ReportStatus, SystemSettings
 from schemas.schemas import (
     AccountScamReportCreate,
     AccountScamReportResponse,
@@ -20,15 +20,17 @@ def create_account_report(
     db: Session = Depends(get_session)
 ):
     """
-    Tạo tố cáo tài khoản scam mới
+    TẠO TỐ CÁO TÀI KHOẢN SCAM MỚI
     """
-    now = datetime.utcnow() # <--- SỬA LỖI: Lấy thời gian hiện tại
+    now = datetime.utcnow()
     
     new_report = AccountScamReport(
         account_number=report.account_number,
         account_name=report.account_name,
         bank_name=report.bank_name,
         facebook_link=report.facebook_link,
+        zalo_link=report.zalo_link,
+        phone_number=report.phone_number,
         evidence_images=report.evidence_images,
         content=report.content,
         reporter_name=report.reporter_name,
@@ -36,8 +38,8 @@ def create_account_report(
         is_victim=report.is_victim,
         is_proxy_report=report.is_proxy_report,
         status=ReportStatus.PENDING,
-        created_at=now,  # <--- SỬA LỖI: Gán thủ công
-        updated_at=now   # <--- SỬA LỖI: Gán thủ công
+        created_at=now,
+        updated_at=now
     )
     
     db.add(new_report)
@@ -63,7 +65,7 @@ def get_account_reports(
     db: Session = Depends(get_session)
 ):
     """
-    Lấy danh sách các tố cáo tài khoản scam
+    LẤY DANH SÁCH TỐ CÁO TÀI KHOẢN SCAM
     """
     query = select(AccountScamReport).order_by(AccountScamReport.created_at.desc())
     
@@ -86,13 +88,13 @@ def get_account_report(
     db: Session = Depends(get_session)
 ):
     """
-    Lấy chi tiết một tố cáo tài khoản scam và tăng lượt xem
+    LẤY CHI TIẾT MỘT TỐ CÁO và tăng lượt xem
     """
     report = db.get(AccountScamReport, report_id)
     if not report:
         raise HTTPException(status_code=404, detail="Không tìm thấy báo cáo")
     
-    # Tăng lượt xem (không commit ngay, để commit chung với updated_at)
+    # Tăng lượt xem
     report.view_count += 1
     report.updated_at = datetime.utcnow()
     db.add(report)
@@ -102,6 +104,24 @@ def get_account_report(
     return report
 
 
+@router.get("/by-person/{account_number}", response_model=List[AccountScamReportResponse])
+def get_reports_by_person(
+    account_number: str,
+    db: Session = Depends(get_session)
+):
+    """
+    LẤY TẤT CẢ BÁO CÁO CỦA 1 NGƯỜI (theo STK/SĐT)
+    """
+    reports = db.exec(
+        select(AccountScamReport)
+        .where(AccountScamReport.account_number == account_number)
+        .where(AccountScamReport.status == ReportStatus.APPROVED)
+        .order_by(AccountScamReport.created_at.desc())
+    ).all()
+    
+    return reports
+
+
 @router.put("/{report_id}", response_model=AccountScamReportResponse)
 def update_account_report(
     report_id: int,
@@ -109,7 +129,7 @@ def update_account_report(
     db: Session = Depends(get_session)
 ):
     """
-    Cập nhật trạng thái/thông tin của tố cáo (Admin)
+    CẬP NHẬT TRẠNG THÁI TỐ CÁO (Admin)
     """
     report = db.get(AccountScamReport, report_id)
     if not report:
@@ -124,11 +144,9 @@ def update_account_report(
 
     # Cập nhật thời gian duyệt nếu chuyển sang APPROVED
     if report_update.status == ReportStatus.APPROVED and not report.approved_at:
-        # Tăng tổng số lượng scam
         settings = db.exec(select(SystemSettings)).first()
         if settings:
             settings.total_account_scams += 1
-            # Nếu có link FB thì tăng tổng số FB scam
             if report.facebook_link:
                 settings.total_fb_scams += 1
             db.add(settings)
@@ -156,7 +174,7 @@ def delete_account_report(
     db: Session = Depends(get_session)
 ):
     """
-    Xóa tố cáo tài khoản scam
+    XÓA TỐ CÁO TÀI KHOẢN SCAM
     """
     report = db.get(AccountScamReport, report_id)
     if not report:
@@ -173,40 +191,3 @@ def delete_account_report(
     db.commit()
     
     return {"success": True, "message": f"Đã xóa báo cáo ID {report_id}"}
-
-
-@router.get("/top/scammers", response_model=List[dict])
-def get_top_scammers(
-    days: int = Query(7, ge=1, le=30, description="Số ngày gần đây"),
-    limit: int = Query(10, ge=1, le=50),
-    db: Session = Depends(get_session)
-):
-    """
-    Lấy danh sách top scammers trong N ngày gần đây
-    """
-    cutoff_date = datetime.utcnow() - timedelta(days=days)
-    
-    # Subquery: đếm số báo cáo cho mỗi account_number
-    query = (
-        select(
-            AccountScamReport.account_number,
-            AccountScamReport.account_name,
-            func.count(AccountScamReport.id).label('report_count')
-        )
-        .where(AccountScamReport.status == ReportStatus.APPROVED)
-        .where(AccountScamReport.created_at >= cutoff_date)
-        .group_by(AccountScamReport.account_number, AccountScamReport.account_name)
-        .order_by(func.count(AccountScamReport.id).desc())
-        .limit(limit)
-    )
-    
-    results = db.exec(query).all()
-    
-    return [
-        {
-            "account_number": r.account_number,
-            "account_name": r.account_name,
-            "report_count": r.report_count
-        }
-        for r in results
-    ]

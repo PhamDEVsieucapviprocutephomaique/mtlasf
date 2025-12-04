@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlmodel import Session, select
 from typing import List, Optional
-from datetime import datetime # <--- SỬA LỖI: Cần import datetime
+from datetime import datetime
 
 from core.database import get_session
 from models.models import InsuranceAdmin
@@ -20,7 +20,7 @@ def create_insurance_admin(
     db: Session = Depends(get_session)
 ):
     """
-    Thêm admin vào Quỹ Bảo Hiểm CS
+    THÊM ADMIN VÀO QUỸ BẢO HIỂM CS (FULL THÔNG TIN)
     """
     # Kiểm tra xem order_number đã tồn tại chưa
     existing = db.exec(
@@ -36,7 +36,7 @@ def create_insurance_admin(
     # Chuyển đổi bank_accounts từ Pydantic models sang dict
     bank_accounts_dict = [acc.dict() for acc in admin.bank_accounts]
     
-    now = datetime.utcnow() # <--- SỬA LỖI: Lấy thời gian hiện tại
+    now = datetime.utcnow()
     new_admin = InsuranceAdmin(
         order_number=admin.order_number,
         full_name=admin.full_name,
@@ -44,14 +44,15 @@ def create_insurance_admin(
         fb_main=admin.fb_main,
         fb_backup=admin.fb_backup,
         zalo=admin.zalo,
+        phone=admin.phone,
         website=admin.website,
         insurance_amount=admin.insurance_amount,
         insurance_start_date=admin.insurance_start_date,
         services=admin.services,
         bank_accounts=bank_accounts_dict,
-        is_active=admin.is_active,
-        created_at=now,  # <--- SỬA LỖI: Gán thủ công
-        updated_at=now   # <--- SỬA LỖI: Gán thủ công
+        is_active=admin.is_active if admin.is_active is not None else True,
+        created_at=now,
+        updated_at=now
     )
     
     db.add(new_admin)
@@ -67,7 +68,7 @@ def get_insurance_admins(
     db: Session = Depends(get_session)
 ):
     """
-    Lấy danh sách admin trong Quỹ Bảo Hiểm CS
+    LẤY DANH SÁCH ADMIN TRONG QUỸ BẢO HIỂM CS
     """
     query = select(InsuranceAdmin).order_by(InsuranceAdmin.order_number)
     
@@ -84,7 +85,7 @@ def get_insurance_admin_by_id(
     db: Session = Depends(get_session)
 ):
     """
-    Lấy thông tin chi tiết của một admin theo ID
+    LẤY THÔNG TIN CHI TIẾT ADMIN THEO ID (FULL A-Z)
     """
     admin = db.get(InsuranceAdmin, admin_id)
     if not admin:
@@ -99,7 +100,7 @@ def get_insurance_admin_by_order(
     db: Session = Depends(get_session)
 ):
     """
-    Lấy thông tin chi tiết của một admin theo Số Thứ Tự
+    LẤY THÔNG TIN CHI TIẾT ADMIN THEO SỐ THỨ TỰ (FULL A-Z)
     """
     admin = db.exec(
         select(InsuranceAdmin).where(InsuranceAdmin.order_number == order_number)
@@ -118,7 +119,7 @@ def update_insurance_admin(
     db: Session = Depends(get_session)
 ):
     """
-    Cập nhật thông tin admin
+    CẬP NHẬT THÔNG TIN ADMIN (FULL FIELDS)
     """
     admin = db.get(InsuranceAdmin, admin_id)
     if not admin:
@@ -149,7 +150,7 @@ def delete_insurance_admin(
     db: Session = Depends(get_session)
 ):
     """
-    Xóa admin khỏi Quỹ Bảo Hiểm CS
+    XÓA ADMIN KHỎI QUỸ BẢO HIỂM CS
     """
     admin = db.get(InsuranceAdmin, admin_id)
     if not admin:

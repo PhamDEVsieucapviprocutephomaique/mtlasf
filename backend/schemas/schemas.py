@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr, HttpUrl, validator
+from pydantic import BaseModel, EmailStr, validator
 from typing import List, Optional
 from datetime import datetime
 from models.models import ReportStatus, ScamCategory
@@ -12,6 +12,8 @@ class AccountScamReportCreate(BaseModel):
     account_name: str
     bank_name: Optional[str] = None
     facebook_link: Optional[str] = None
+    zalo_link: Optional[str] = None
+    phone_number: Optional[str] = None
     evidence_images: List[str] = []
     content: str
     reporter_name: str
@@ -27,6 +29,8 @@ class AccountScamReportResponse(BaseModel):
     account_name: str
     bank_name: Optional[str]
     facebook_link: Optional[str]
+    zalo_link: Optional[str]
+    phone_number: Optional[str]
     evidence_images: List[str]
     content: str
     reporter_name: str
@@ -36,6 +40,8 @@ class AccountScamReportResponse(BaseModel):
     status: ReportStatus
     view_count: int
     comment_count: int
+    search_count: int
+    report_count: int
     created_at: datetime
     approved_at: Optional[datetime]
     
@@ -69,6 +75,7 @@ class WebsiteScamReportResponse(BaseModel):
     reporter_email: str
     status: ReportStatus
     view_count: int
+    search_count: int
     created_at: datetime
     approved_at: Optional[datetime]
     
@@ -79,7 +86,7 @@ class WebsiteScamReportResponse(BaseModel):
 # === SCHEMAS CHO BÌNH LUẬN ===
 
 class CommentCreate(BaseModel):
-    """Schema tạo bình luận"""
+    """Schema tạo bình luận (CHỈ TÊN + NỘI DUNG)"""
     author_name: str
     content: str
 
@@ -107,22 +114,24 @@ class BankAccountInfo(BaseModel):
 
 
 class InsuranceAdminCreate(BaseModel):
-    """Schema tạo admin quỹ bảo hiểm CS"""
+    """Schema tạo admin quỹ bảo hiểm CS (FULL THÔNG TIN)"""
     order_number: int
     full_name: str
     avatar_url: Optional[str] = None
     fb_main: Optional[str] = None
     fb_backup: Optional[str] = None
     zalo: Optional[str] = None
+    phone: Optional[str] = None
     website: Optional[str] = None
     insurance_amount: float = 0
     insurance_start_date: Optional[datetime] = None
     services: List[str] = []
     bank_accounts: List[BankAccountInfo] = []
+    is_active: Optional[bool] = True
 
 
 class InsuranceAdminResponse(BaseModel):
-    """Schema trả về admin quỹ bảo hiểm CS"""
+    """Schema trả về admin quỹ bảo hiểm CS (FULL A-Z)"""
     id: int
     order_number: int
     full_name: str
@@ -130,6 +139,7 @@ class InsuranceAdminResponse(BaseModel):
     fb_main: Optional[str]
     fb_backup: Optional[str]
     zalo: Optional[str]
+    phone: Optional[str]
     website: Optional[str]
     insurance_amount: float
     insurance_start_date: Optional[datetime]
@@ -137,18 +147,20 @@ class InsuranceAdminResponse(BaseModel):
     bank_accounts: List[dict]
     is_active: bool
     created_at: datetime
+    updated_at: datetime
     
     class Config:
         from_attributes = True
 
 
 class InsuranceAdminUpdate(BaseModel):
-    """Schema cập nhật admin"""
+    """Schema cập nhật admin (FULL FIELDS)"""
     full_name: Optional[str] = None
     avatar_url: Optional[str] = None
     fb_main: Optional[str] = None
     fb_backup: Optional[str] = None
     zalo: Optional[str] = None
+    phone: Optional[str] = None
     website: Optional[str] = None
     insurance_amount: Optional[float] = None
     insurance_start_date: Optional[datetime] = None
@@ -158,17 +170,6 @@ class InsuranceAdminUpdate(BaseModel):
 
 
 # === SCHEMAS CHO TÌM KIẾM ===
-
-class SearchRequest(BaseModel):
-    """Schema yêu cầu tìm kiếm"""
-    query: str
-    
-    @validator('query')
-    def validate_query(cls, v):
-        if not v or len(v.strip()) < 3:
-            raise ValueError('Từ khóa tìm kiếm phải có ít nhất 3 ký tự')
-        return v.strip()
-
 
 class SearchResult(BaseModel):
     """Schema kết quả tìm kiếm"""
@@ -186,16 +187,8 @@ class DashboardStats(BaseModel):
     total_comments: int
     pending_reports: int
     today_reports_count: int
-    top_scammers_7days: List[dict]  # Top scammer 7 ngày
-    top_searches_today: List[dict]  # Top tìm kiếm hôm nay
-
-
-class TopScammer(BaseModel):
-    """Schema top scammer"""
-    account_number: str
-    account_name: str
-    report_count: int
-    view_count: int
+    top_scammers_7days: List[dict]
+    top_searches_today: List[dict]
 
 
 # === SCHEMAS CHO SETTINGS ===
