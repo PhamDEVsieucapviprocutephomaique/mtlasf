@@ -31,17 +31,18 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           <div>
             <h3 className="font-bold text-lg mb-3 flex items-center">
-              CHECKSCAM
+              CHECKGDTG
             </h3>
             <p className="text-sm text-green-300">
               Hệ thống chống lừa đảo, bảo vệ cộng đồng. Tra cứu, tố cáo và cảnh
               báo scammer.
             </p>
             <div className="mt-4 text-xs text-green-400">
-              <p>API: http://localhost:8000</p>
+              <p>API: xanohtml.nnmust.h989xkw</p>
               <p>
                 Status: <span className="text-green-500">ONLINE</span>
               </p>
+              <p>by anodev telegram: https://web.telegram.org/k/#@o2v25</p>
             </div>
           </div>
 
@@ -113,7 +114,7 @@ const Footer = () => {
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
               <p className="text-green-300">
-                © {currentYear} CHECKSCAM. ALL RIGHTS RESERVED.
+                © {currentYear} CHECKGDTG. ALL RIGHTS RESERVED.
               </p>
               <p className="text-xs text-green-500 mt-1">
                 Hệ thống bảo vệ cộng đồng khỏi lừa đảo trực tuyến
@@ -125,7 +126,7 @@ const Footer = () => {
                 VERSION 2.0.0
               </span>
               <span className="px-3 py-1 bg-green-900 bg-opacity-30 rounded text-xs">
-                BUILD 2024.12
+                BUILD 2025.12
               </span>
               <span className="px-3 py-1 bg-green-900 bg-opacity-30 rounded text-xs">
                 API v1
@@ -138,6 +139,9 @@ const Footer = () => {
               HỆ THỐNG AN NINH: Dữ liệu được mã hóa và bảo vệ. Không chia sẻ
               thông tin cá nhân nhạy cảm. Chỉ sử dụng với mục đích chống lừa
               đảo.
+            </p>
+            <p>
+              @Được làm bởi anodev, telegram: https://web.telegram.org/k/#@o2v25{" "}
             </p>
           </div>
         </div>

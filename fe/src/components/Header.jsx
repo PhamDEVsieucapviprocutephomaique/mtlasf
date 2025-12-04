@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 
 const Header = ({ theme, setTheme }) => {
@@ -10,7 +10,33 @@ const Header = ({ theme, setTheme }) => {
     "-----------------------------------",
   ]);
   const [loading, setLoading] = useState(false);
+  const [systemSettings, setSystemSettings] = useState({
+    facebook_group: "#",
+    telegram_link: "#",
+  });
   const location = useLocation();
+
+  // Fetch system settings khi component mount
+  useEffect(() => {
+    fetchSystemSettings();
+  }, []);
+
+  const fetchSystemSettings = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8000/api/dashboard/settings"
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setSystemSettings({
+          facebook_group: data.facebook_group || "#",
+          telegram_link: data.telegram_link || "#",
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching system settings:", error);
+    }
+  };
 
   const navItems = [
     { path: "/", label: "TRANG CHỦ" },
@@ -101,7 +127,7 @@ Trạng thái: ${admin.is_active ? "ĐANG HOẠT ĐỘNG" : "NGỪNG HOẠT Đ�
               </div>
               <div>
                 <h1 className="text-2xl font-bold glow-green">
-                  CHECKSCAM<span className="blink">_</span>
+                  CHECKGDTG<span className="blink">_</span>
                 </h1>
                 <p className="text-xs text-green-300">HỆ THỐNG CHỐNG LỪA ĐẢO</p>
               </div>
@@ -149,23 +175,49 @@ Trạng thái: ${admin.is_active ? "ĐANG HOẠT ĐỘNG" : "NGỪNG HOẠT Đ�
           </div>
 
           <div className="mt-3 flex flex-wrap items-center justify-between text-xs">
+            {/* THAY THẾ PHẦN NÀY BẰNG FACEBOOK & TELEGRAM LINKS */}
             <div className="flex items-center space-x-4">
-              <div className="flex items-center">
+              <a
+                href={systemSettings.facebook_group}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center hover:text-green-400 transition-colors"
+              >
+                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                <span>FACEBOOK GROUP</span>
+              </a>
+
+              <a
+                href={systemSettings.telegram_link}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center hover:text-green-400 transition-colors"
+              >
+                <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
+                <span>TELEGRAM</span>
+              </a>
+
+              {/* Giữ lại phần hiển thị trạng thái hệ thống nhưng chuyển sang bên phải */}
+              <div className="hidden md:flex items-center">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                <span>SYSTEM: ONLINE</span>
+                <span className="text-green-400">SYSTEM: ONLINE</span>
               </div>
-              <div className="flex items-center">
+            </div>
+
+            {/* Phần bên phải - Hiển thị thông tin IP và API status */}
+            <div className="text-green-300 flex items-center space-x-4">
+              <div className="hidden md:flex items-center">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
                 <span>API: CONNECTED</span>
               </div>
-              <div className="flex items-center">
+              <div className="hidden md:flex items-center">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                <span>DATABASE: LIVE</span>
+                <span>DB: LIVE</span>
               </div>
-            </div>
-            <div className="text-green-300">
-              <span className="mr-4">USER: ANONYMOUS</span>
-              <span>IP: 127.0.0.1</span>
+              <div className="flex items-center">
+                <span className="mr-2">USER: ANONYMOUS</span>
+                <span>IP: No Permission</span>
+              </div>
             </div>
           </div>
         </div>

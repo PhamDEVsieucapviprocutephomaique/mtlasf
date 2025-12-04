@@ -89,7 +89,7 @@ const Dashboard = () => {
               </div>
               <div className="text-sm text-green-300">STK SCAM</div>
             </div>
-            <div className="text-2xl">💰</div>
+            <div className="text-2xl"></div>
           </div>
           <div className="mt-2 text-xs text-green-400">
             +{formatNumber(stats?.today_reports_count || 0)} hôm nay
@@ -104,7 +104,7 @@ const Dashboard = () => {
               </div>
               <div className="text-sm text-green-300">FB SCAM</div>
             </div>
-            <div className="text-2xl">📘</div>
+            <div className="text-2xl"></div>
           </div>
           <div className="mt-2 text-xs text-green-400">Có link Facebook</div>
         </div>
@@ -117,7 +117,7 @@ const Dashboard = () => {
               </div>
               <div className="text-sm text-green-300">CHỜ DUYỆT</div>
             </div>
-            <div className="text-2xl">⏳</div>
+            <div className="text-2xl"></div>
           </div>
           <div className="mt-2 text-xs text-green-400">Báo cáo đang xử lý</div>
         </div>
@@ -130,7 +130,7 @@ const Dashboard = () => {
               </div>
               <div className="text-sm text-green-300">BÌNH LUẬN</div>
             </div>
-            <div className="text-2xl">💬</div>
+            <div className="text-2xl"></div>
           </div>
           <div className="mt-2 text-xs text-green-400">Tương tác cộng đồng</div>
         </div>
