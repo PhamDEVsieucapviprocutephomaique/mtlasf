@@ -24,7 +24,7 @@ const Header = ({ theme, setTheme }) => {
   const fetchSystemSettings = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/api/dashboard/settings"
+        "https://api.checkgdtg.vn/api/dashboard/settings"
       );
       if (response.ok) {
         const data = await response.json();
@@ -63,7 +63,7 @@ const Header = ({ theme, setTheme }) => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/search/admin/find?q=${encodeURIComponent(
+        `https://api.checkgdtg.vn/api/search/admin/find?q=${encodeURIComponent(
           query
         )}`
       );

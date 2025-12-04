@@ -81,12 +81,12 @@ const AdminPanel = () => {
     try {
       // Fetch pending reports
       const [accounts, websites] = await Promise.all([
-        fetch("http://localhost:8000/api/account-reports?status=pending").then(
-          (res) => res.json()
-        ),
-        fetch("http://localhost:8000/api/website-reports?status=pending").then(
-          (res) => res.json()
-        ),
+        fetch(
+          "https://api.checkgdtg.vn/api/account-reports?status=pending"
+        ).then((res) => res.json()),
+        fetch(
+          "https://api.checkgdtg.vn/api/website-reports?status=pending"
+        ).then((res) => res.json()),
       ]);
 
       setPendingAccounts(accounts);
@@ -94,14 +94,14 @@ const AdminPanel = () => {
 
       // Fetch insurance admins
       const adminsResponse = await fetch(
-        "http://localhost:8000/api/insurance-admins/"
+        "https://api.checkgdtg.vn/api/insurance-admins/"
       );
       const admins = await adminsResponse.json();
       setInsuranceAdmins(admins);
 
       // Fetch system settings
       const settingsResponse = await fetch(
-        "http://localhost:8000/api/dashboard/settings"
+        "https://api.checkgdtg.vn/api/dashboard/settings"
       );
       const settings = await settingsResponse.json();
       setSystemSettings(settings);
@@ -109,10 +109,10 @@ const AdminPanel = () => {
       // Fetch all reports for management tab
       if (activeTab === "manage") {
         const [allAcc, allWeb] = await Promise.all([
-          fetch("http://localhost:8000/api/account-reports?limit=100").then(
+          fetch("https://api.checkgdtg.vn/api/account-reports?limit=100").then(
             (res) => res.json()
           ),
-          fetch("http://localhost:8000/api/website-reports?limit=100").then(
+          fetch("https://api.checkgdtg.vn/api/website-reports?limit=100").then(
             (res) => res.json()
           ),
         ]);
@@ -135,10 +135,13 @@ const AdminPanel = () => {
       const formData = new FormData();
       formData.append("file", file);
 
-      const response = await fetch("http://localhost:8000/api/upload/single", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://api.checkgdtg.vn/api/upload/single",
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const result = await response.json();
 
@@ -167,7 +170,7 @@ const AdminPanel = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:8000/api/search/admin/find?q=${encodeURIComponent(
+        `https://api.checkgdtg.vn/api/search/admin/find?q=${encodeURIComponent(
           searchQuery.trim()
         )}`
       );
@@ -194,7 +197,7 @@ const AdminPanel = () => {
           ? `/api/account-reports/${id}`
           : `/api/website-reports/${id}`;
 
-      await fetch(`http://localhost:8000${endpoint}`, {
+      await fetch(`https://api.checkgdtg.vn${endpoint}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "approved" }),
@@ -216,7 +219,7 @@ const AdminPanel = () => {
           ? `/api/account-reports/${id}`
           : `/api/website-reports/${id}`;
 
-      await fetch(`http://localhost:8000${endpoint}`, {
+      await fetch(`https://api.checkgdtg.vn${endpoint}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: "rejected" }),
@@ -238,7 +241,7 @@ const AdminPanel = () => {
           ? `/api/account-reports/${id}`
           : `/api/website-reports/${id}`;
 
-      await fetch(`http://localhost:8000${endpoint}`, {
+      await fetch(`https://api.checkgdtg.vn${endpoint}`, {
         method: "DELETE",
       });
 
@@ -292,7 +295,7 @@ const AdminPanel = () => {
       };
 
       const response = await fetch(
-        "http://localhost:8000/api/insurance-admins/",
+        "https://api.checkgdtg.vn/api/insurance-admins/",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -362,7 +365,7 @@ const AdminPanel = () => {
       console.log("Update data:", updateData);
 
       const response = await fetch(
-        `http://localhost:8000/api/insurance-admins/${editAdminData.id}`,
+        `https://api.checkgdtg.vn/api/insurance-admins/${editAdminData.id}`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -390,7 +393,7 @@ const AdminPanel = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/insurance-admins/${adminId}`,
+        `https://api.checkgdtg.vn/api/insurance-admins/${adminId}`,
         {
           method: "DELETE",
         }
@@ -475,7 +478,7 @@ const AdminPanel = () => {
   // =============== SYSTEM SETTINGS ===============
   const handleSaveSettings = async () => {
     try {
-      await fetch("http://localhost:8000/api/dashboard/settings", {
+      await fetch("https://api.checkgdtg.vn/api/dashboard/settings", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(systemSettings),
@@ -489,7 +492,7 @@ const AdminPanel = () => {
 
   const handleRefreshStats = async () => {
     try {
-      await fetch("http://localhost:8000/api/dashboard/refresh-stats", {
+      await fetch("https://api.checkgdtg.vn/api/dashboard/refresh-stats", {
         method: "POST",
       });
       alert("✅ Đã làm mới thống kê!");
@@ -543,7 +546,7 @@ const AdminPanel = () => {
               </button>
             </div>
             <div className="text-xs text-red-400 mt-2 text-center md:text-right">
-              API: localhost:8000 | ADMIN: ROOT
+              API: api.checkgdtg.vn | ADMIN: ROOT
             </div>
           </div>
         </div>

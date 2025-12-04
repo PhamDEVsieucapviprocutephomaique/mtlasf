@@ -46,7 +46,9 @@ const Search = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/search/?q=${encodeURIComponent(searchQuery)}`
+        `https://api.checkgdtg.vn/api/search/?q=${encodeURIComponent(
+          searchQuery
+        )}`
       );
       if (!response.ok) throw new Error("Lỗi kết nối server");
 
@@ -74,7 +76,7 @@ const Search = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/search/check/${encodeURIComponent(
+        `https://api.checkgdtg.vn/api/search/check/${encodeURIComponent(
           query.trim()
         )}`
       );
@@ -110,7 +112,7 @@ const Search = () => {
           : `/api/website-reports/${report.id}`;
 
       // Gọi API GET để trigger tăng view_count (backend đã xử lý)
-      await fetch(`http://localhost:8000${endpoint}`);
+      await fetch(`https://api.checkgdtg.vn${endpoint}`);
 
       // Cập nhật local state để hiển thị ngay
       if (type === "account") {
@@ -162,7 +164,7 @@ const Search = () => {
     // Fetch comments cho báo cáo này
     try {
       const response = await fetch(
-        `http://localhost:8000/api/comments/${type}_scam/${report.id}`
+        `https://api.checkgdtg.vn/api/comments/${type}_scam/${report.id}`
       );
       const commentsData = await response.json();
       setComments(commentsData);
@@ -186,7 +188,7 @@ const Search = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/comments/${selectedReportType}_scam/${selectedReport.id}`,
+        `https://api.checkgdtg.vn/api/comments/${selectedReportType}_scam/${selectedReport.id}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -568,7 +570,7 @@ const Search = () => {
             <div className="bg-green-900 px-6 py-4 flex justify-between items-center">
               <h2 className="text-xl font-bold">
                 {selectedReportType === "account"
-                  ? "💰 CHI TIẾT BÁO CÁO TÀI KHOẢN"
+                  ? "CHI TIẾT BÁO CÁO TÀI KHOẢN"
                   : "🌐 CHI TIẾT BÁO CÁO WEBSITE"}
               </h2>
               <button

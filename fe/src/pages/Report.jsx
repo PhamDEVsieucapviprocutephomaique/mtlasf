@@ -44,7 +44,7 @@ const Report = () => {
   const fetchCategories = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/api/website-reports/categories"
+        "https://api.checkgdtg.vn/api/website-reports/categories"
       );
       const data = await response.json();
       setCategories(data.categories || []);
@@ -122,7 +122,7 @@ const Report = () => {
         formData.append("file", file);
 
         const response = await fetch(
-          "http://localhost:8000/api/upload/single",
+          "https://api.checkgdtg.vn/api/upload/single",
           {
             method: "POST",
             body: formData,
@@ -217,7 +217,7 @@ const Report = () => {
       }
 
       const response = await fetch(
-        "http://localhost:8000/api/upload/multiple",
+        "https://api.checkgdtg.vn/api/upload/multiple",
         {
           method: "POST",
           body: formData,
@@ -288,7 +288,7 @@ const Report = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/api/account-reports/",
+        "https://api.checkgdtg.vn/api/account-reports/",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -371,7 +371,7 @@ const Report = () => {
 
     try {
       const response = await fetch(
-        "http://localhost:8000/api/website-reports/",
+        "https://api.checkgdtg.vn/api/website-reports/",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

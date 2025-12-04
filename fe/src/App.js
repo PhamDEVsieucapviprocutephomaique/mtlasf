@@ -31,7 +31,7 @@ function App() {
                 <Route path="/scam-list" element={<ScamList />} />
                 <Route path="/insurance-fund" element={<InsuranceFund />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/admin" element={<AdminPanel />} />
+                <Route path="/adminnguyenducdanh" element={<AdminPanel />} />
               </Routes>
             </main>
             <Footer />

@@ -88,7 +88,7 @@ const Home = () => {
     if (scammer.account_number) {
       // Gọi API để lấy chi tiết báo cáo đầu tiên của scammer này
       fetch(
-        `http://localhost:8000/api/search/?q=${encodeURIComponent(
+        `https://api.checkgdtg.vn/api/search/?q=${encodeURIComponent(
           scammer.account_number
         )}`
       )
@@ -127,7 +127,7 @@ const Home = () => {
           : `/api/website-reports/${report.id}`;
 
       // Gọi API GET để trigger tăng view_count (backend đã xử lý)
-      await fetch(`http://localhost:8000${endpoint}`);
+      await fetch(`https://api.checkgdtg.vn${endpoint}`);
 
       // Cập nhật local state để hiển thị ngay
       const updatedReport = {
@@ -163,7 +163,7 @@ const Home = () => {
     // Fetch comments cho báo cáo này
     try {
       const response = await fetch(
-        `http://localhost:8000/api/comments/${type}_scam/${report.id}`
+        `https://api.checkgdtg.vn/api/comments/${type}_scam/${report.id}`
       );
       const commentsData = await response.json();
       setComments(commentsData);
@@ -187,7 +187,7 @@ const Home = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/comments/${selectedReportType}_scam/${selectedReport.id}`,
+        `https://api.checkgdtg.vn/api/comments/${selectedReportType}_scam/${selectedReport.id}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -576,7 +576,7 @@ const Home = () => {
             <div className="bg-green-900 px-6 py-4 flex justify-between items-center">
               <h2 className="text-xl font-bold">
                 {selectedReportType === "account"
-                  ? "💰 CHI TIẾT BÁO CÁO TÀI KHOẢN"
+                  ? " CHI TIẾT BÁO CÁO TÀI KHOẢN"
                   : "🌐 CHI TIẾT BÁO CÁO WEBSITE"}
               </h2>
               <button

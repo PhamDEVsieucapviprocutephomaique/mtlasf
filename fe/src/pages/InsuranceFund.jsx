@@ -16,7 +16,7 @@ const InsuranceFund = () => {
   const fetchAdmins = async () => {
     try {
       const response = await fetch(
-        "http://localhost:8000/api/insurance-admins/"
+        "https://api.checkgdtg.vn/api/insurance-admins/"
       );
       const data = await response.json();
       setAdmins(data);
@@ -41,7 +41,7 @@ const InsuranceFund = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/search/admin/find?q=${encodeURIComponent(
+        `https://api.checkgdtg.vn/api/search/admin/find?q=${encodeURIComponent(
           searchQuery.trim()
         )}`
       );

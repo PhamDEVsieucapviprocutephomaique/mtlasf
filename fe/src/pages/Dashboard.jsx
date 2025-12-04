@@ -17,17 +17,17 @@ const Dashboard = () => {
     try {
       const [statsData, scammersData, searchesData, todayData] =
         await Promise.all([
-          fetch("http://localhost:8000/api/dashboard/stats").then((res) =>
+          fetch("https://api.checkgdtg.vn/api/dashboard/stats").then((res) =>
             res.json()
           ),
-          fetch("http://localhost:8000/api/search/top/reported-7days").then(
+          fetch("https://api.checkgdtg.vn/api/search/top/reported-7days").then(
             (res) => res.json()
           ),
-          fetch("http://localhost:8000/api/search/top/searches-today").then(
+          fetch("https://api.checkgdtg.vn/api/search/top/searches-today").then(
             (res) => res.json()
           ),
-          fetch("http://localhost:8000/api/search/reports/today").then((res) =>
-            res.json()
+          fetch("https://api.checkgdtg.vn/api/search/reports/today").then(
+            (res) => res.json()
           ),
         ]);
 

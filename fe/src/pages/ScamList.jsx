@@ -48,14 +48,14 @@ const ScamList = () => {
 
       if (activeTab === "accounts") {
         const response = await fetch(
-          `http://localhost:8000/api/account-reports?${params}`
+          `https://api.checkgdtg.vn/api/account-reports?${params}`
         );
         const reports = await response.json();
         setAccountReports(reports);
         setTotalPages(Math.ceil(reports.length / 20) || 1);
       } else {
         const response = await fetch(
-          `http://localhost:8000/api/website-reports?${params}`
+          `https://api.checkgdtg.vn/api/website-reports?${params}`
         );
         const reports = await response.json();
         setWebsiteReports(reports);
@@ -72,7 +72,7 @@ const ScamList = () => {
     setLoading(true);
     try {
       const response = await fetch(
-        `http://localhost:8000/api/search/check/${encodeURIComponent(
+        `https://api.checkgdtg.vn/api/search/check/${encodeURIComponent(
           identifier
         )}`
       );
@@ -109,7 +109,7 @@ const ScamList = () => {
       // ĐỔI TỪ: /api/search/check/${query}
       // THÀNH: /api/search/?q=${query}
       const response = await fetch(
-        `http://localhost:8000/api/search/?q=${encodeURIComponent(
+        `https://api.checkgdtg.vn/api/search/?q=${encodeURIComponent(
           searchQuery.trim()
         )}`
       );
@@ -153,7 +153,7 @@ const ScamList = () => {
           : `/api/website-reports/${report.id}`;
 
       // Gọi API GET để trigger tăng view_count (backend đã xử lý)
-      await fetch(`http://localhost:8000${endpoint}`);
+      await fetch(`https://api.checkgdtg.vn${endpoint}`);
 
       // Cập nhật local state để hiển thị ngay
       if (type === "account") {
@@ -199,7 +199,7 @@ const ScamList = () => {
     // Fetch comments cho báo cáo này
     try {
       const response = await fetch(
-        `http://localhost:8000/api/comments/${type}_scam/${report.id}`
+        `https://api.checkgdtg.vn/api/comments/${type}_scam/${report.id}`
       );
       const commentsData = await response.json();
       setComments(commentsData);
@@ -223,7 +223,7 @@ const ScamList = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/api/comments/${selectedReportType}_scam/${selectedReport.id}`,
+        `https://api.checkgdtg.vn/api/comments/${selectedReportType}_scam/${selectedReport.id}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -645,7 +645,7 @@ const ScamList = () => {
             <div className="bg-green-900 px-6 py-4 flex justify-between items-center">
               <h2 className="text-xl font-bold">
                 {selectedReportType === "account"
-                  ? "💰 CHI TIẾT BÁO CÁO TÀI KHOẢN"
+                  ? " CHI TIẾT BÁO CÁO TÀI KHOẢN"
                   : "🌐 CHI TIẾT BÁO CÁO WEBSITE"}
               </h2>
               <button
