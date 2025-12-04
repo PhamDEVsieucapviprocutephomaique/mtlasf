@@ -34,13 +34,13 @@ class ErrorBoundary extends Component {
                 onClick={() => window.location.reload()}
                 className="px-6 py-3 bg-green-700 border border-green-500 rounded-lg hover:bg-green-600 transition-all font-bold"
               >
-                🔄 RELOAD SYSTEM
+                RELOAD SYSTEM
               </button>
               <button
                 onClick={() => (window.location.href = "/")}
                 className="ml-4 px-6 py-3 bg-gray-700 border border-gray-500 rounded-lg hover:bg-gray-600 transition-all"
               >
-                🏠 GO TO HOME
+                GO TO HOME
               </button>
             </div>
             <div className="mt-8 text-sm text-green-600">

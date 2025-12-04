@@ -130,7 +130,13 @@ def update_insurance_admin(
     
     # Xử lý riêng bank_accounts
     if "bank_accounts" in update_data and update_data["bank_accounts"]:
-        update_data["bank_accounts"] = [acc.dict() for acc in update_data["bank_accounts"]]
+        # update_data["bank_accounts"] = [acc.dict() for acc in update_data["bank_accounts"]]
+        if hasattr(update_data["bank_accounts"][0], 'dict'):
+            # Là Pydantic model, convert sang dict
+            update_data["bank_accounts"] = [acc.dict() for acc in update_data["bank_accounts"]]
+        else:
+            # Đã là dict, giữ nguyên
+            pass
     
     for field, value in update_data.items():
         setattr(admin, field, value)

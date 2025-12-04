@@ -25,7 +25,7 @@ const HackerTheme = ({ children, theme = "hacker" }) => {
     },
   };
 
-  const currentTheme = themes[theme];
+  const currentTheme = themes[theme] || themes.hacker;
 
   return (
     <div
@@ -119,6 +119,11 @@ const HackerTheme = ({ children, theme = "hacker" }) => {
           50% {
             border-color: #00ff00;
           }
+        }
+
+        .terminal-cursor::after {
+          content: "_";
+          animation: blink 1s infinite;
         }
       `}</style>
       {children}

@@ -4,7 +4,6 @@ const Loading = ({ message = "ĐANG TẢI..." }) => {
   return (
     <div className="flex flex-col items-center justify-center py-12">
       <div className="relative">
-        {/* Binary code animation */}
         <div className="absolute inset-0 overflow-hidden rounded-lg">
           {[...Array(20)].map((_, i) => (
             <div
@@ -22,13 +21,11 @@ const Loading = ({ message = "ĐANG TẢI..." }) => {
           ))}
         </div>
 
-        {/* Main spinner */}
         <div className="relative">
           <div className="w-20 h-20 border-4 border-green-700 rounded-full">
             <div className="w-full h-full border-4 border-green-500 border-t-transparent rounded-full animate-spin"></div>
           </div>
 
-          {/* Inner circles */}
           <div className="absolute inset-0 flex items-center justify-center">
             <div className="w-12 h-12 border-2 border-green-600 rounded-full animate-ping"></div>
           </div>

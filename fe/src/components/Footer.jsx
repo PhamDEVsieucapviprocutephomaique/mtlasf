@@ -1,16 +1,36 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
+  const [systemStats, setSystemStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchSystemStats();
+  }, []);
+
+  const fetchSystemStats = async () => {
+    try {
+      const response = await fetch("http://localhost:8000/api/dashboard/stats");
+      const data = await response.json();
+      setSystemStats(data);
+    } catch (error) {
+      console.error("Error fetching system stats:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const formatNumber = (num) => {
+    return new Intl.NumberFormat("vi-VN").format(num || 0);
+  };
 
   return (
     <footer className="mt-12 border-t border-green-800 pt-6 pb-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* Left - About */}
           <div>
             <h3 className="font-bold text-lg mb-3 flex items-center">
-              <span className="mr-2">⚡</span>
               CHECKSCAM
             </h3>
             <p className="text-sm text-green-300">
@@ -20,72 +40,75 @@ const Footer = () => {
             <div className="mt-4 text-xs text-green-400">
               <p>API: http://localhost:8000</p>
               <p>
-                Status: <span className="text-green-500">● ONLINE</span>
+                Status: <span className="text-green-500">ONLINE</span>
               </p>
             </div>
           </div>
 
-          {/* Middle - Quick Links */}
           <div>
-            <h3 className="font-bold text-lg mb-3">QUICK LINKS</h3>
+            <h3 className="font-bold text-lg mb-3">LIÊN KẾT NHANH</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <a href="/search" className="hover:text-green-300">
-                  🔍 Tra Cứu Scam
+                <a href="/" className="hover:text-green-300">
+                  Trang Chủ
                 </a>
               </li>
               <li>
-                <a href="/report" className="hover:text-green-300">
-                  🚨 Báo Cáo Scam
+                <a href="/search" className="hover:text-green-300">
+                  Tra Cứu Scam
                 </a>
               </li>
               <li>
                 <a href="/scam-list" className="hover:text-green-300">
-                  📋 Danh Sách Scam
+                  Danh Sách Scam
+                </a>
+              </li>
+              <li>
+                <a href="/report" className="hover:text-green-300">
+                  Tố Cáo Scam
                 </a>
               </li>
               <li>
                 <a href="/insurance-fund" className="hover:text-green-300">
-                  🛡️ Quỹ Bảo Hiểm
-                </a>
-              </li>
-              <li>
-                <a href="/dashboard" className="hover:text-green-300">
-                  📊 Thống Kê
+                  Quỹ Bảo Hiểm
                 </a>
               </li>
             </ul>
           </div>
 
-          {/* Right - System Info */}
           <div>
-            <h3 className="font-bold text-lg mb-3">SYSTEM INFO</h3>
+            <h3 className="font-bold text-lg mb-3">THỐNG KÊ HỆ THỐNG</h3>
             <div className="space-y-2 text-sm">
               <div className="flex justify-between">
-                <span>API Status:</span>
-                <span className="text-green-500">● LIVE</span>
+                <span>STK Scam:</span>
+                <span className="text-green-500">
+                  {loading
+                    ? "..."
+                    : formatNumber(systemStats?.total_account_scams)}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span>Database:</span>
-                <span className="text-green-500">● CONNECTED</span>
+                <span>FB Scam:</span>
+                <span className="text-green-500">
+                  {loading ? "..." : formatNumber(systemStats?.total_fb_scams)}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span>Reports Today:</span>
-                <span className="text-yellow-500">24</span>
+                <span>Bình luận:</span>
+                <span>
+                  {loading ? "..." : formatNumber(systemStats?.total_comments)}
+                </span>
               </div>
               <div className="flex justify-between">
-                <span>Total Scams:</span>
-                <span className="text-red-500">1,234</span>
-              </div>
-              <div className="flex justify-between">
-                <span>Uptime:</span>
-                <span>99.8%</span>
+                <span>Chờ duyệt:</span>
+                <span className="text-yellow-500">
+                  {loading ? "..." : formatNumber(systemStats?.pending_reports)}
+                </span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* Bottom Bar */}
         <div className="mt-8 pt-6 border-t border-green-900 text-center text-sm">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="mb-4 md:mb-0">
@@ -99,7 +122,7 @@ const Footer = () => {
 
             <div className="flex space-x-4">
               <span className="px-3 py-1 bg-green-900 bg-opacity-30 rounded text-xs">
-                VERSION 1.0.0
+                VERSION 2.0.0
               </span>
               <span className="px-3 py-1 bg-green-900 bg-opacity-30 rounded text-xs">
                 BUILD 2024.12
@@ -110,10 +133,9 @@ const Footer = () => {
             </div>
           </div>
 
-          {/* Security Notice */}
           <div className="mt-6 p-3 bg-black bg-opacity-50 border border-green-800 rounded">
             <p className="text-xs text-green-400">
-              ⚠️ HỆ THỐNG AN NINH: Dữ liệu được mã hóa và bảo vệ. Không chia sẻ
+              HỆ THỐNG AN NINH: Dữ liệu được mã hóa và bảo vệ. Không chia sẻ
               thông tin cá nhân nhạy cảm. Chỉ sử dụng với mục đích chống lừa
               đảo.
             </p>
