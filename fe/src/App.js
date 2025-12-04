@@ -2,34 +2,39 @@ import React, { useState } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
+import MatrixRain from "./components/MatrixRain";
+import HackerTheme from "./components/HackerTheme";
 import Home from "./pages/Home";
-import Products from "./pages/Products";
-import News from "./pages/News";
-import Contact from "./pages/Contact";
-import FloatingButtons from "./components/FloatingButtons";
-import Admin from "./pages/Admin";
-import CartView from "./components/CartView";
+import Search from "./pages/Search";
+import Report from "./pages/Report";
+import ScamList from "./pages/ScamList";
+import InsuranceFund from "./pages/InsuranceFund";
+import Dashboard from "./pages/Dashboard";
+import AdminPanel from "./pages/AdminPanel";
 
 function App() {
-  const [isCartOpen, setIsCartOpen] = useState(false);
+  const [theme, setTheme] = useState("hacker");
 
   return (
     <Router>
-      <div className="min-h-screen flex flex-col">
-        <Header onCartClick={() => setIsCartOpen(true)} />
-        <main className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/san-pham" element={<Products />} />
-            <Route path="/tin-tuc" element={<News />} />
-            <Route path="/lien-he" element={<Contact />} />
-            <Route path="/admin" element={<Admin />} />
-          </Routes>
-        </main>
-        <Footer />
-        <FloatingButtons />
-        <CartView isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-      </div>
+      <HackerTheme theme={theme}>
+        <MatrixRain />
+        <div className="min-h-screen flex flex-col relative z-10">
+          <Header theme={theme} setTheme={setTheme} />
+          <main className="flex-grow container mx-auto px-4 py-8">
+            <Routes>
+              <Route path="/" element={<Home />} />
+              <Route path="/search" element={<Search />} />
+              <Route path="/report" element={<Report />} />
+              <Route path="/scam-list" element={<ScamList />} />
+              <Route path="/insurance-fund" element={<InsuranceFund />} />
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/admin" element={<AdminPanel />} />
+            </Routes>
+          </main>
+          <Footer />
+        </div>
+      </HackerTheme>
     </Router>
   );
 }
