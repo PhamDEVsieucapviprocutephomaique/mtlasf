@@ -595,7 +595,7 @@ const AdminPanel = () => {
           <div className="border border-red-700 rounded-lg overflow-hidden">
             <div className="bg-red-900 bg-opacity-30 p-4">
               <h3 className="font-bold text-lg">
-                💰 TÀI KHOẢN SCAM CHỜ DUYỆT ({pendingAccounts.length})
+                TÀI KHOẢN SCAM CHỜ DUYỆT ({pendingAccounts.length})
               </h3>
             </div>
             <div className="p-4">
@@ -659,7 +659,7 @@ const AdminPanel = () => {
             <div className="border border-green-700 rounded-lg overflow-hidden">
               <div className="bg-green-900 bg-opacity-30 p-4">
                 <h3 className="font-bold">
-                  💰 TÀI KHOẢN SCAM ({allAccounts.length})
+                  TÀI KHOẢN SCAM ({allAccounts.length})
                 </h3>
               </div>
               <div className="p-4 max-h-96 overflow-y-auto">
@@ -884,7 +884,7 @@ const AdminPanel = () => {
                   onClick={() => setEditSettings(true)}
                   className="px-4 py-2 bg-yellow-700 border border-yellow-500 rounded hover:bg-yellow-600"
                 >
-                  ✏️ CHỈNH SỬA
+                  CHỈNH SỬA
                 </button>
               )}
             </div>
@@ -893,7 +893,7 @@ const AdminPanel = () => {
                 {/* System Stats */}
                 <div>
                   <h4 className="font-bold mb-3 text-green-400">
-                    📊 THỐNG KÊ HỆ THỐNG
+                    THỐNG KÊ HỆ THỐNG
                   </h4>
                   <div className="space-y-3">
                     <StatItem
