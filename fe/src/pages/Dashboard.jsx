@@ -62,9 +62,7 @@ const Dashboard = () => {
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold mb-2 glow-green">
-            DASHBOARD HỆ THỐNG
-          </h1>
+          <h1 className="text-3xl font-bold mb-2 glow-green">THỐNG KÊ</h1>
           <p className="text-green-300">
             Thống kê toàn diện & phân tích dữ liệu scam
           </p>

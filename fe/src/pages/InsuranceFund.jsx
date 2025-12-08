@@ -74,7 +74,9 @@ const InsuranceFund = () => {
   return (
     <div className="space-y-6">
       <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold mb-2 glow-green">QUỸ BẢO HIỂM CS</h1>
+        <h1 className="text-3xl font-bold mb-2 glow-green">
+          QUỸ BẢO HIỂM CHECKGDTG
+        </h1>
         <p className="text-green-300">
           Danh sách Admin trung gian uy tín - Bảo vệ giao dịch an toàn
         </p>
@@ -402,16 +404,13 @@ const InsuranceFund = () => {
 
       {/* Information Box */}
       <div className="bg-black bg-opacity-50 border border-blue-700 rounded-lg p-6">
-        <h3 className="font-bold mb-3">VỀ QUỸ BẢO HIỂM CS</h3>
+        <h3 className="font-bold mb-3">Quỹ bảo hiểm checkgdtg.vn </h3>
         <div className="space-y-3 text-sm text-blue-300">
-          <p>Quỹ bảo hiểm CS là hệ thống admin trung gian đáng tin cậy:</p>
-          <ul className="list-disc pl-5 space-y-1">
-            <li>Cam kết bảo vệ giao dịch an toàn</li>
-            <li>Quỹ bảo hiểm đảm bảo từ 50 - 500 triệu VNĐ</li>
-            <li>Hỗ trợ đa dạng dịch vụ: giao dịch, trung gian, bảo hiểm</li>
-            <li>Thông tin minh bạch, xác minh rõ ràng</li>
-            <li>Liên hệ trực tiếp qua Facebook, Zalo, Website</li>
-          </ul>
+          <p>
+            bảo đảm an toàn với người này trong giới hạn số tiền cọc khi nhập nó
+            sẽ tự hiện thị VND của TÊN GDV để được an toàn cao nhất
+          </p>
+
           <p className="mt-3 text-yellow-400">
             LƯU Ý: Luôn xác minh admin trước khi giao dịch. Không chuyển tiền
             trước khi xác nhận.

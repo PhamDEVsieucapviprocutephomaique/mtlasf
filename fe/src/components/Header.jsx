@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-
+import imageslogo from "../images/4d507a03dc5c53020a4d.jpg";
 const Header = ({ theme, setTheme }) => {
   const [showTerminal, setShowTerminal] = useState(false);
   const [terminalInput, setTerminalInput] = useState("");
@@ -122,12 +122,16 @@ Trạng thái: ${admin.is_active ? "ĐANG HOẠT ĐỘNG" : "NGỪNG HOẠT Đ�
         <div className="container mx-auto px-4 py-3">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
             <Link to="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-green-500 rounded-lg flex items-center justify-center">
-                <span className="text-black font-bold text-xl">CS</span>
+              <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center">
+                <img
+                  src={imageslogo}
+                  alt="CHECKGDTG Logo"
+                  className="w-full h-full object-cover"
+                />
               </div>
               <div>
                 <h1 className="text-2xl font-bold glow-green">
-                  CHECKGDTG<span className="blink">_</span>
+                  CHECKGDTG<span className="blink"></span>
                 </h1>
                 <p className="text-xs text-green-300">HỆ THỐNG CHỐNG LỪA ĐẢO</p>
               </div>
@@ -150,7 +154,7 @@ Trạng thái: ${admin.is_active ? "ĐANG HOẠT ĐỘNG" : "NGỪNG HOẠT Đ�
             </nav>
 
             <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
+              {/* <div className="flex items-center space-x-2">
                 <span className="text-sm">THEME:</span>
                 <select
                   value={theme}
@@ -163,7 +167,7 @@ Trạng thái: ${admin.is_active ? "ĐANG HOẠT ĐỘNG" : "NGỪNG HOẠT Đ�
                     </option>
                   ))}
                 </select>
-              </div>
+              </div> */}
 
               <button
                 onClick={() => setShowTerminal(!showTerminal)}
@@ -188,6 +192,14 @@ Trạng thái: ${admin.is_active ? "ĐANG HOẠT ĐỘNG" : "NGỪNG HOẠT Đ�
               </a>
 
               <a
+                href="https://t.me/CHECKGDTGBOT"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="px-4 py-2 bg-blue-600 border border-blue-500 rounded-lg hover:bg-blue-700 transition-all font-bold flex items-center"
+              >
+                🤖 TELEGRAM BOT
+              </a>
+              <a
                 href={systemSettings.telegram_link}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -196,29 +208,14 @@ Trạng thái: ${admin.is_active ? "ĐANG HOẠT ĐỘNG" : "NGỪNG HOẠT Đ�
                 <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
                 <span>TELEGRAM</span>
               </a>
-
               {/* Giữ lại phần hiển thị trạng thái hệ thống nhưng chuyển sang bên phải */}
               <div className="hidden md:flex items-center">
                 <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
-                <span className="text-green-400">SYSTEM: ONLINE</span>
               </div>
             </div>
 
             {/* Phần bên phải - Hiển thị thông tin IP và API status */}
-            <div className="text-green-300 flex items-center space-x-4">
-              <div className="hidden md:flex items-center">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                <span>API: CONNECTED</span>
-              </div>
-              <div className="hidden md:flex items-center">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                <span>DB: LIVE</span>
-              </div>
-              <div className="flex items-center">
-                <span className="mr-2">USER: ANONYMOUS</span>
-                <span>IP: No Permission</span>
-              </div>
-            </div>
+            <div className="text-green-300 flex items-center space-x-4"></div>
           </div>
         </div>
       </header>

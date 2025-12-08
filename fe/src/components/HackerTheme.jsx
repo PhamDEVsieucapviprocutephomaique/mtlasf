@@ -3,11 +3,12 @@ import React from "react";
 const HackerTheme = ({ children, theme = "hacker" }) => {
   const themes = {
     hacker: {
+      // Đổi thành classic nhưng giữ tên hacker
       bg: "bg-black",
-      text: "text-green-400",
+      text: "text-white", // THAY ĐỔI: Xanh lá → Trắng (dễ nhìn nhất)
       border: "border-green-500",
       glow: "glow-green",
-      terminal: "bg-black text-green-400 border-green-600",
+      terminal: "bg-black text-white border-green-600", // Chữ trắng
     },
     matrix: {
       bg: "bg-black",
@@ -38,8 +39,9 @@ const HackerTheme = ({ children, theme = "hacker" }) => {
           font-family: "Share Tech Mono", monospace;
         }
 
+        /* GLOW EFFECT - GIỮ NGUYÊN ĐỂ CÓ HIỆU ỨNG ĐẸP */
         .glow-green {
-          text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00, 0 0 15px #00ff00;
+          text-shadow: 0 0 5px #ffffff, 0 0 10px #00ff00, 0 0 20px #00ff00; /* Chữ trắng glow xanh */
         }
 
         .glow-matrix {
@@ -50,6 +52,7 @@ const HackerTheme = ({ children, theme = "hacker" }) => {
           text-shadow: 0 0 5px #9d00ff, 0 0 10px #9d00ff;
         }
 
+        /* CÁC HIỆU ỨNG KHÁC GIỮ NGUYÊN */
         .scan-line {
           position: relative;
           overflow: hidden;

@@ -44,7 +44,6 @@ const Footer = () => {
               <p>
                 Status: <span className="text-green-500">ONLINE</span>
               </p>
-              <p>by anodev telegram: https://web.telegram.org/k/#@o2v25</p>
             </div>
           </div>
 
@@ -141,9 +140,6 @@ const Footer = () => {
               HỆ THỐNG AN NINH: Dữ liệu được mã hóa và bảo vệ. Không chia sẻ
               thông tin cá nhân nhạy cảm. Chỉ sử dụng với mục đích chống lừa
               đảo.
-            </p>
-            <p>
-              @Được làm bởi anodev, telegram: https://web.telegram.org/k/#@o2v25{" "}
             </p>
           </div>
         </div>

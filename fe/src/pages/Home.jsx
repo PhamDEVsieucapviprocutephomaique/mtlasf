@@ -254,7 +254,7 @@ const Home = () => {
       {/* Hero Section */}
       <div className="text-center py-8 scan-line relative">
         <h1 className="text-5xl font-bold mb-4 typewriter glow-green">
-          CHECKGDTG<span className="blink">_</span>
+          CHECKGDTG<span className="blink"></span>
         </h1>
         <p className="text-xl text-green-300 mb-6">
           HỆ THỐNG CHỐNG LỪA ĐẢO - BẢO VỆ CỘNG ĐỒNG

@@ -14,7 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import AdminPanel from "./pages/AdminPanel";
 
 function App() {
-  const [theme, setTheme] = useState("hacker");
+  const [theme, setTheme] = useState("cyberpunk");
 
   return (
     <Router>
@@ -31,7 +31,7 @@ function App() {
                 <Route path="/scam-list" element={<ScamList />} />
                 <Route path="/insurance-fund" element={<InsuranceFund />} />
                 <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/adminnguyenducdanh" element={<AdminPanel />} />
+                <Route path="/adminsetting" element={<AdminPanel />} />
               </Routes>
             </main>
             <Footer />
