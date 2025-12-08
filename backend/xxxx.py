@@ -2,12 +2,14 @@ import aiohttp
 import asyncio
 import re
 import json
-from urllib.parse import urlparse, unquote
+
+# ✅ 2 LOẠI CACHE
+_cache = {}  # Cache theo URL
+_uid_cache = {}  # Cache theo UID (để các link khác nhau cùng UID dùng chung)
 
 class FacebookUIDExtractor:
-    def __init__(self, access_token: str = None):
+    def __init__(self):
         self.session = None
-        self.access_token = access_token
         
     async def __aenter__(self):
         self.session = aiohttp.ClientSession()
@@ -16,108 +18,6 @@ class FacebookUIDExtractor:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         if self.session:
             await self.session.close()
-    
-    # ============================================================
-    # PHẦN 1: XỬ LÝ USERNAME LINKS (TỪ CODE 2)
-    # ============================================================
-    
-    async def method_scraping(self, username: str) -> str | None:
-        """Scrape từ mbasic - endpoint đơn giản nhất"""
-        try:
-            headers = {
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-                "Accept-Language": "en-US,en;q=0.9",
-            }
-            
-            # TRY 1: mbasic (best for scraping)
-            url = f"https://mbasic.facebook.com/{username}"
-            try:
-                async with self.session.get(url, headers=headers) as resp:
-                    if resp.status == 200:
-                        html = await resp.text()
-                        
-                        patterns = [
-                            r'profile\.php\?id=(\d{10,})',
-                            r'owner_id=(\d{10,})',
-                            r'entity_id=(\d{10,})',
-                            r'profile_id=(\d{10,})',
-                            r'/save/confirm/\?id=(\d{10,})',
-                        ]
-                        
-                        for pattern in patterns:
-                            match = re.search(pattern, html)
-                            if match:
-                                uid = match.group(1)
-                                if int(uid) > 100000000:
-                                    return uid
-            except:
-                pass
-            
-            # TRY 2: mobile redirect
-            url = f"https://m.facebook.com/{username}"
-            try:
-                async with self.session.get(url, headers=headers, allow_redirects=True) as resp:
-                    final_url = str(resp.url)
-                    match = re.search(r'profile\.php\?id=(\d{10,})', final_url)
-                    if match:
-                        return match.group(1)
-                    
-                    if resp.status == 200:
-                        html = await resp.text()
-                        patterns = [
-                            r'"userID":"(\d{10,})"',
-                            r'"pageID":"(\d{10,})"',
-                            r'fb://profile/(\d{10,})',
-                            r'fb://page/(\d{10,})',
-                        ]
-                        
-                        for pattern in patterns:
-                            match = re.search(pattern, html)
-                            if match:
-                                return match.group(1)
-            except:
-                pass
-        
-            return None
-        except:
-            return None
-    
-    async def method_graph_api(self, username: str) -> str | None:
-        """Dùng Facebook Graph API"""
-        if not self.access_token:
-            # Thử không có token (chỉ work cho Page public)
-            url = f"https://graph.facebook.com/v19.0/{username}"
-        else:
-            url = f"https://graph.facebook.com/v19.0/{username}?access_token={self.access_token}"
-        
-        try:
-            async with self.session.get(url) as resp:
-                if resp.status == 200:
-                    data = await resp.json()
-                    return data.get('id')
-                else:
-                    return None
-        except:
-            return None
-    
-    async def method_lookup_service(self, url: str) -> str | None:
-        """Dùng các service công khai"""
-        try:
-            # Service 1: findids.net API
-            lookup_url = f"https://findids.net/api/get?url={url}"
-            async with self.session.get(lookup_url, timeout=aiohttp.ClientTimeout(total=10)) as resp:
-                if resp.status == 200:
-                    data = await resp.json()
-                    if data.get('id'):
-                        return str(data['id'])
-        except:
-            pass
-        
-        return None
-    
-    # ============================================================
-    # PHẦN 2: XỬ LÝ POST/SHARE LINKS (TỪ CODE 1)
-    # ============================================================
     
     def extract_post_id_from_url(self, url: str) -> str | None:
         """Trích xuất post ID từ share link"""
@@ -145,7 +45,6 @@ class FacebookUIDExtractor:
             async with self.session.get(post_url, headers=headers, allow_redirects=True, timeout=15) as resp:
                 html = await resp.text()
                 
-                # Tìm JSON-LD data
                 json_ld_pattern = r'<script type="application/ld\+json">(.*?)</script>'
                 matches = re.findall(json_ld_pattern, html, re.DOTALL)
                 
@@ -157,11 +56,9 @@ class FacebookUIDExtractor:
                     except:
                         pass
                 
-                # Tìm trong meta tags
                 meta_patterns = [
                     r'<meta property="al:android:url" content="fb://profile/(\d{10,})"',
                     r'<meta property="al:ios:url" content="fb://profile/(\d{10,})"',
-                    r'<meta property="fb:app_id".*?content="(\d+)"',
                 ]
                 
                 for pattern in meta_patterns:
@@ -177,7 +74,6 @@ class FacebookUIDExtractor:
     async def get_uid_from_post_mobile(self, post_url: str) -> str | None:
         """Scrape từ mobile version của post"""
         try:
-            # Chuyển sang mobile URL
             mobile_url = post_url.replace("www.facebook.com", "m.facebook.com")
             
             headers = {
@@ -190,7 +86,6 @@ class FacebookUIDExtractor:
                 final_url = str(resp.url)
                 html = await resp.text()
                 
-                # Tìm trong URL
                 patterns_url = [
                     r'profile\.php\?id=(\d{10,})',
                     r'/(\d{10,})/?$',
@@ -204,7 +99,6 @@ class FacebookUIDExtractor:
                             if group and len(group) >= 10:
                                 return group
                 
-                # Tìm trong HTML
                 patterns_html = [
                     r'"actorID":"(\d{10,})"',
                     r'"userID":"(\d{10,})"',
@@ -221,24 +115,114 @@ class FacebookUIDExtractor:
                         elif match and len(match) >= 10:
                             return match
         
-        except Exception as e:
+        except:
             pass
         
         return None
     
-    # ============================================================
-    # HÀM CHÍNH - KẾT HỢP TẤT CẢ
-    # ============================================================
+    async def get_uid_from_username_mbasic(self, username: str) -> str | None:
+        """Scrape từ mbasic facebook"""
+        try:
+            url = f"https://mbasic.facebook.com/{username}"
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                "Accept-Language": "en-US,en;q=0.9",
+            }
+            
+            async with self.session.get(url, headers=headers) as resp:
+                if resp.status == 200:
+                    html = await resp.text()
+                    
+                    patterns = [
+                        r'profile\.php\?id=(\d{10,})',
+                        r'owner_id=(\d{10,})',
+                        r'entity_id=(\d{10,})',
+                        r'profile_id=(\d{10,})',
+                        r'/save/confirm/\?id=(\d{10,})',
+                    ]
+                    
+                    for pattern in patterns:
+                        match = re.search(pattern, html)
+                        if match:
+                            uid = match.group(1)
+                            if int(uid) > 100000000:
+                                return uid
+        except:
+            pass
+        
+        return None
+    
+    async def get_uid_from_username_mobile(self, username: str) -> str | None:
+        """Scrape từ mobile facebook"""
+        try:
+            url = f"https://m.facebook.com/{username}"
+            headers = {
+                'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X) AppleWebKit/605.1.15',
+                'Accept': 'text/html,application/xhtml+xml',
+            }
+            
+            async with self.session.get(url, headers=headers, allow_redirects=True) as resp:
+                final_url = str(resp.url)
+                match = re.search(r'profile\.php\?id=(\d{10,})', final_url)
+                if match:
+                    return match.group(1)
+                
+                if resp.status == 200:
+                    html = await resp.text()
+                    patterns = [
+                        r'"userID":"(\d{10,})"',
+                        r'"pageID":"(\d{10,})"',
+                        r'fb://profile/(\d{10,})',
+                        r'fb://page/(\d{10,})',
+                    ]
+                    
+                    for pattern in patterns:
+                        match = re.search(pattern, html)
+                        if match:
+                            return match.group(1)
+        except:
+            pass
+        
+        return None
+    
+    async def get_uid_from_api_service(self, url: str) -> str | None:
+        """Dùng API service thứ 3"""
+        try:
+            lookup_url = f"https://findids.net/api/get?url={url}"
+            async with self.session.get(lookup_url, timeout=10) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    if data.get('id'):
+                        return str(data['id'])
+        except:
+            pass
+        
+        return None
+    
+    def _save_to_cache(self, url: str, result: dict):
+        """Lưu vào cả 2 loại cache"""
+        if result.get('success') and result.get('uid'):
+            uid = result['uid']
+            
+            # Lưu cache theo URL
+            _cache[url] = result
+            
+            # Lưu cache theo UID (để link khác cùng UID dùng chung)
+            _uid_cache[uid] = result
+            
+            print(f"💾 Đã lưu cache: URL + UID={uid}")
     
     async def get_facebook_uid(self, url: str) -> dict:
-        """
-        Lấy UID từ mọi loại link Facebook
-        Kết hợp cả 2 phương pháp từ code 1 và code 2
-        """
+        """Lấy UID từ mọi loại link Facebook"""
+        
+        # ✅ BƯỚC 1: Check cache theo URL
+        if url in _cache:
+            print(f"✨ Lấy từ cache (URL): {url[:50]}...")
+            return _cache[url]
+        
         try:
             url = url.strip()
             
-            # Xử lý URL có text thừa
             if "link pc" in url.lower() or "link mobile" in url.lower():
                 match = re.search(r'(https?://[^\s]+)', url)
                 if match:
@@ -250,7 +234,7 @@ class FacebookUIDExtractor:
             print(f"📱 Đang xử lý: {url}")
             
             # ============================================
-            # BƯỚC 1: KIỂM TRA ID TRỰC TIẾP TRONG URL
+            # BƯỚC 2: KIỂM TRA ID TRỰC TIẾP TRONG URL
             # ============================================
             
             direct_patterns = [
@@ -264,22 +248,33 @@ class FacebookUIDExtractor:
             for pattern in direct_patterns:
                 match = re.search(pattern, url, re.IGNORECASE)
                 if match:
-                    return {
-                        'uid': match.group(1),
+                    uid = match.group(1)
+                    
+                    # ✅ CHECK: UID đã có trong cache chưa?
+                    if uid in _uid_cache:
+                        print(f"✨ Lấy từ cache (UID): {uid}")
+                        result = _uid_cache[uid].copy()
+                        result['url'] = url  # Update URL mới
+                        _cache[url] = result  # Lưu URL mới vào cache
+                        return result
+                    
+                    result = {
+                        'uid': uid,
                         'method': 'direct_url_id',
                         'success': True,
                         'url': url
                     }
+                    self._save_to_cache(url, result)
+                    return result
             
             # ============================================
-            # BƯỚC 2: KIỂM TRA POST/SHARE LINKS (CODE 1)
+            # BƯỚC 3: KIỂM TRA POST/SHARE LINKS
             # ============================================
             
             post_id = self.extract_post_id_from_url(url)
             if post_id:
                 print(f"🔍 Phát hiện post/share link: {post_id}")
                 
-                # Thử các phương pháp cho post
                 methods = [
                     ('web_scrape', self.get_uid_from_post_web),
                     ('mobile_scrape', self.get_uid_from_post_mobile),
@@ -289,24 +284,33 @@ class FacebookUIDExtractor:
                     print(f"  🔄 Thử {method_name}...")
                     uid = await method_func(url)
                     if uid:
-                        return {
+                        # ✅ CHECK: UID đã có trong cache chưa?
+                        if uid in _uid_cache:
+                            print(f"✨ Lấy từ cache (UID): {uid}")
+                            result = _uid_cache[uid].copy()
+                            result['url'] = url
+                            result['post_id'] = post_id
+                            _cache[url] = result
+                            return result
+                        
+                        result = {
                             'uid': uid,
                             'method': method_name,
                             'post_id': post_id,
                             'success': True,
                             'url': url
                         }
-                    print(f"  ❌ {method_name} thất bại")
+                        self._save_to_cache(url, result)
+                        return result
             
             # ============================================
-            # BƯỚC 3: KIỂM TRA USERNAME LINKS (CODE 2)
+            # BƯỚC 4: KIỂM TRA USERNAME LINKS
             # ============================================
             
             username_match = re.search(r'facebook\.com/([^/?&]+)', url, re.IGNORECASE)
             if username_match:
                 username = username_match.group(1)
                 
-                # Bỏ qua các path không phải username
                 if username in ['profile.php', 'pages', 'groups', 'events', 'marketplace', 'watch', 'share']:
                     return {
                         'uid': None,
@@ -317,33 +321,42 @@ class FacebookUIDExtractor:
                 
                 print(f"🔍 Phát hiện username: {username}")
                 
-                # Thử các phương pháp cho username
                 methods = [
-                    ('graph_api', self.method_graph_api),
-                    ('scraping', self.method_scraping),
-                    ('lookup_service', self.method_lookup_service),
+                    ('mbasic_scrape', self.get_uid_from_username_mbasic),
+                    ('mobile_scrape', self.get_uid_from_username_mobile),
+                    ('api_service', self.get_uid_from_api_service),
                 ]
                 
                 for method_name, method_func in methods:
                     print(f"  🔄 Thử {method_name}...")
                     
-                    if method_name == 'lookup_service':
+                    if method_name == 'api_service':
                         uid = await method_func(url)
                     else:
                         uid = await method_func(username)
                     
                     if uid:
-                        return {
+                        # ✅ CHECK: UID đã có trong cache chưa?
+                        if uid in _uid_cache:
+                            print(f"✨ Lấy từ cache (UID): {uid}")
+                            result = _uid_cache[uid].copy()
+                            result['url'] = url
+                            result['username'] = username
+                            _cache[url] = result
+                            return result
+                        
+                        result = {
                             'uid': uid,
                             'method': method_name,
                             'username': username,
                             'success': True,
                             'url': url
                         }
-                    print(f"  ❌ {method_name} thất bại")
+                        self._save_to_cache(url, result)
+                        return result
             
             # ============================================
-            # BƯỚC 4: PHÂN TÍCH CHUNG
+            # BƯỚC 5: PHÂN TÍCH CHUNG
             # ============================================
             
             try:
@@ -355,18 +368,28 @@ class FacebookUIDExtractor:
                     final_url = str(resp.url)
                     html = await resp.text()
                     
-                    # Tìm ID trong final URL
                     for pattern in direct_patterns:
                         match = re.search(pattern, final_url, re.IGNORECASE)
                         if match:
-                            return {
-                                'uid': match.group(1),
+                            uid = match.group(1)
+                            
+                            # ✅ CHECK: UID đã có trong cache chưa?
+                            if uid in _uid_cache:
+                                print(f"✨ Lấy từ cache (UID): {uid}")
+                                result = _uid_cache[uid].copy()
+                                result['url'] = url
+                                _cache[url] = result
+                                return result
+                            
+                            result = {
+                                'uid': uid,
                                 'method': 'final_url_id',
                                 'success': True,
                                 'url': url
                             }
+                            self._save_to_cache(url, result)
+                            return result
                     
-                    # Tìm trong HTML
                     html_patterns = [
                         r'"userID":"(\d{10,})"',
                         r'"actorID":"(\d{10,})"',
@@ -379,12 +402,24 @@ class FacebookUIDExtractor:
                     for pattern in html_patterns:
                         match = re.search(pattern, html)
                         if match:
-                            return {
-                                'uid': match.group(1),
+                            uid = match.group(1)
+                            
+                            # ✅ CHECK: UID đã có trong cache chưa?
+                            if uid in _uid_cache:
+                                print(f"✨ Lấy từ cache (UID): {uid}")
+                                result = _uid_cache[uid].copy()
+                                result['url'] = url
+                                _cache[url] = result
+                                return result
+                            
+                            result = {
+                                'uid': uid,
                                 'method': 'html_parse',
                                 'success': True,
                                 'url': url
                             }
+                            self._save_to_cache(url, result)
+                            return result
             except:
                 pass
             
@@ -403,13 +438,14 @@ class FacebookUIDExtractor:
                 'url': url if 'url' in locals() else 'unknown'
             }
 
+
 # ============================================================
 # CLI INTERFACE
 # ============================================================
 
 async def main():
     print("=" * 80)
-    print("FACEBOOK UID EXTRACTOR - COMBINED VERSION")
+    print("FACEBOOK UID EXTRACTOR - NO TOKEN REQUIRED")
     print("=" * 80)
     print("\nHỗ trợ TẤT CẢ loại link:")
     print("  ✅ Share links: facebook.com/share/xxxxx/")
@@ -420,18 +456,7 @@ async def main():
     print("  ✅ Với text: link pc https://facebook.com/...")
     print()
     
-    access_token = None
-    use_token = input("🤖 Bạn có muốn dùng Graph API token không? (y/n): ").lower()
-    
-    if use_token == 'y':
-        token = input("🔑 Nhập access token: ").strip()
-        if token:
-            access_token = token
-            print("✅ Token đã lưu!")
-    
-    print("\n" + "=" * 80)
-    
-    async with FacebookUIDExtractor(access_token) as extractor:
+    async with FacebookUIDExtractor() as extractor:
         while True:
             print("\n" + "=" * 80)
             user_input = input("🔗 Nhập link Facebook (hoặc 'exit' để thoát): ").strip()
@@ -463,7 +488,6 @@ async def main():
                 
                 print(f"\n   🔗 Profile link: https://facebook.com/{result['uid']}")
                 
-                # Kiểm tra loại ID
                 if result['uid'].startswith('615'):
                     print(f"   ℹ️  Đây là Page ID (bắt đầu bằng 615)")
                 elif len(result['uid']) >= 15:
@@ -480,7 +504,7 @@ async def main():
                 print(f"   1. Kiểm tra link có đúng không")
                 print(f"   2. Đảm bảo post/profile là public")
                 print(f"   3. Thử link mobile version: m.facebook.com/...")
-                print(f"   4. Dùng Graph API token để tăng tỉ lệ thành công")
+                print(f"   4. Link có thể là private (chỉ bạn bè)")
 
 if __name__ == "__main__":
     try:

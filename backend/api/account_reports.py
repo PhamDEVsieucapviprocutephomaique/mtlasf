@@ -4,6 +4,7 @@ from typing import List, Optional
 from datetime import datetime, timedelta
 
 from core.database import get_session
+from core.facebook_utils import normalize_facebook_link  # ← THÊM IMPORT
 from models.models import AccountScamReport, ReportStatus, SystemSettings
 from schemas.schemas import (
     AccountScamReportCreate,
@@ -15,7 +16,7 @@ router = APIRouter()
 
 
 @router.post("/", response_model=AccountScamReportResponse, status_code=201)
-def create_account_report(
+async def create_account_report(  # ← ĐỔI THÀNH async
     report: AccountScamReportCreate,
     db: Session = Depends(get_session)
 ):
@@ -24,12 +25,16 @@ def create_account_report(
     """
     now = datetime.utcnow()
     
+    # ← NORMALIZE FACEBOOK LINK TRƯỚC KHI LƯU
+    facebook_link = await normalize_facebook_link(report.facebook_link)
+    zalo_link = await normalize_facebook_link(report.zalo_link)  # Zalo link cũng có thể là FB
+    
     new_report = AccountScamReport(
         account_number=report.account_number,
         account_name=report.account_name,
         bank_name=report.bank_name,
-        facebook_link=report.facebook_link,
-        zalo_link=report.zalo_link,
+        facebook_link=facebook_link,  # ← DÙNG LINK ĐÃ CHUẨN HÓA
+        zalo_link=zalo_link,  # ← DÙNG LINK ĐÃ CHUẨN HÓA
         phone_number=report.phone_number,
         evidence_images=report.evidence_images,
         content=report.content,
@@ -105,16 +110,19 @@ def get_account_report(
 
 
 @router.get("/by-person/{account_number}", response_model=List[AccountScamReportResponse])
-def get_reports_by_person(
+async def get_reports_by_person(  # ← ĐỔI THÀNH async
     account_number: str,
     db: Session = Depends(get_session)
 ):
     """
-    LẤY TẤT CẢ BÁO CÁO CỦA 1 NGƯỜI (theo STK/SĐT)
+    LẤY TẤT CẢ BÁO CÁO CỦA 1 NGƯỜI (theo STK/SĐT/FB Link)
     """
+    # ← NORMALIZE NẾU LÀ FACEBOOK LINK
+    normalized_account = await normalize_facebook_link(account_number)
+    
     reports = db.exec(
         select(AccountScamReport)
-        .where(AccountScamReport.account_number == account_number)
+        .where(AccountScamReport.account_number == normalized_account)
         .where(AccountScamReport.status == ReportStatus.APPROVED)
         .order_by(AccountScamReport.created_at.desc())
     ).all()
@@ -123,7 +131,7 @@ def get_reports_by_person(
 
 
 @router.put("/{report_id}", response_model=AccountScamReportResponse)
-def update_account_report(
+async def update_account_report(  # ← ĐỔI THÀNH async
     report_id: int,
     report_update: AccountScamReportUpdate,
     db: Session = Depends(get_session)
@@ -138,6 +146,13 @@ def update_account_report(
     old_status = report.status
     
     update_data = report_update.dict(exclude_unset=True)
+    
+    # ← NORMALIZE FACEBOOK LINK NẾU CÓ TRONG UPDATE
+    if 'facebook_link' in update_data and update_data['facebook_link']:
+        update_data['facebook_link'] = await normalize_facebook_link(update_data['facebook_link'])
+    
+    if 'zalo_link' in update_data and update_data['zalo_link']:
+        update_data['zalo_link'] = await normalize_facebook_link(update_data['zalo_link'])
     
     for field, value in update_data.items():
         setattr(report, field, value)
