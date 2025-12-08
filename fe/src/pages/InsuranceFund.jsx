@@ -215,70 +215,72 @@ const InsuranceFund = () => {
         </div>
       )}
 
-      {/* Admin Detail Modal - HIỆN FULL KHI CLICK */}
+      {/* Admin Detail Modal - TỐI ƯU CHO MOBILE */}
       {selectedAdmin && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-2 md:p-4">
           <div
             className="absolute inset-0 bg-black bg-opacity-75"
             onClick={() => setSelectedAdmin(null)}
           ></div>
-          <div className="relative w-full max-w-2xl bg-black border-2 border-blue-500 rounded-lg overflow-hidden">
-            <div className="bg-blue-900 px-6 py-4">
+          <div className="relative w-full max-w-md md:max-w-2xl max-h-[90vh] overflow-y-auto bg-black border-2 border-blue-500 rounded-lg">
+            {/* Header với nút close cố định */}
+            <div className="sticky top-0 bg-blue-900 px-4 py-3 z-10">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-bold">
+                <h2 className="text-lg md:text-xl font-bold truncate">
                   ADMIN #{selectedAdmin.order_number}
                 </h2>
                 <button
                   onClick={() => setSelectedAdmin(null)}
-                  className="text-xl hover:text-green-300"
+                  className="text-2xl hover:text-green-300 w-8 h-8 flex items-center justify-center"
+                  aria-label="Đóng"
                 >
                   ×
                 </button>
               </div>
             </div>
 
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div className="p-3 md:p-6">
+              <div className="flex flex-col md:flex-row gap-4 md:gap-6">
                 {/* Left Column - Avatar & Basic Info */}
-                <div className="md:col-span-1">
+                <div className="md:w-1/3">
                   <div className="text-center">
                     {selectedAdmin.avatar_url ? (
                       <img
                         src={selectedAdmin.avatar_url}
                         alt={selectedAdmin.full_name}
-                        className="w-32 h-32 rounded-full mx-auto mb-4 border-2 border-blue-600"
+                        className="w-24 h-24 md:w-32 md:h-32 rounded-full mx-auto mb-3 md:mb-4 border-2 border-blue-600"
                       />
                     ) : (
-                      <div className="w-32 h-32 rounded-full bg-blue-700 flex items-center justify-center text-4xl mx-auto mb-4 border-2 border-blue-600">
+                      <div className="w-24 h-24 md:w-32 md:h-32 rounded-full bg-blue-700 flex items-center justify-center text-3xl md:text-4xl mx-auto mb-3 md:mb-4 border-2 border-blue-600">
                         👤
                       </div>
                     )}
-                    <h3 className="text-xl font-bold mb-2">
+                    <h3 className="text-lg md:text-xl font-bold mb-1 md:mb-2 truncate px-2">
                       {selectedAdmin.full_name}
                     </h3>
                     <div
-                      className={`px-3 py-1 rounded-full text-sm inline-block mb-4 ${
+                      className={`px-2 py-1 rounded-full text-xs md:text-sm inline-block mb-3 md:mb-4 ${
                         selectedAdmin.is_active
                           ? "bg-green-900 text-green-300"
                           : "bg-gray-700 text-gray-400"
                       }`}
                     >
                       {selectedAdmin.is_active
-                        ? "ĐANG HOẠT ĐỘNG"
-                        : "NGỪNG HOẠT ĐỘNG"}
+                        ? "✅ ĐANG HOẠT ĐỘNG"
+                        : "⛔ NGỪNG HOẠT ĐỘNG"}
                     </div>
                   </div>
                 </div>
 
                 {/* Right Column - Detailed Info */}
-                <div className="md:col-span-2 space-y-4">
+                <div className="md:w-2/3 space-y-3 md:space-y-4">
                   {/* Quỹ Bảo Hiểm */}
                   <div>
-                    <h4 className="font-bold mb-2 text-green-400">
+                    <h4 className="font-bold mb-1 md:mb-2 text-green-400 text-sm md:text-base">
                       QUỸ BẢO HIỂM
                     </h4>
-                    <div className="bg-blue-900 bg-opacity-30 p-3 rounded">
-                      <div className="text-2xl font-bold text-green-400 mb-1">
+                    <div className="bg-blue-900 bg-opacity-30 p-2 md:p-3 rounded">
+                      <div className="text-lg md:text-2xl font-bold text-green-400 mb-1">
                         {formatCurrency(selectedAdmin.insurance_amount)}
                       </div>
                       {selectedAdmin.insurance_start_date && (
@@ -292,48 +294,54 @@ const InsuranceFund = () => {
                     </div>
                   </div>
 
-                  {/* Liên hệ */}
+                  {/* Liên hệ - Tối ưu cho mobile */}
                   <div>
-                    <h4 className="font-bold mb-2 text-green-400">
+                    <h4 className="font-bold mb-1 md:mb-2 text-green-400 text-sm md:text-base">
                       THÔNG TIN LIÊN HỆ
                     </h4>
                     <div className="space-y-2">
                       {selectedAdmin.zalo && (
-                        <div className="flex items-center">
-                          <span className="w-24 text-sm">Zalo:</span>
-                          <span className="font-mono">
+                        <div className="flex flex-col md:flex-row md:items-center">
+                          <span className="text-xs md:text-sm text-gray-400 mb-1 md:mb-0 md:w-20">
+                            Zalo:
+                          </span>
+                          <span className="font-mono text-sm md:text-base break-all">
                             {selectedAdmin.zalo}
                           </span>
                         </div>
                       )}
                       {selectedAdmin.phone && (
-                        <div className="flex items-center">
-                          <span className="w-24 text-sm">SĐT:</span>
-                          <span className="font-mono">
+                        <div className="flex flex-col md:flex-row md:items-center">
+                          <span className="text-xs md:text-sm text-gray-400 mb-1 md:mb-0 md:w-20">
+                            SĐT:
+                          </span>
+                          <span className="font-mono text-sm md:text-base">
                             {selectedAdmin.phone}
                           </span>
                         </div>
                       )}
-                      {selectedAdmin.fb_main && (
-                        <a
-                          href={selectedAdmin.fb_main}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block bg-blue-800 hover:bg-blue-700 px-3 py-2 rounded text-center"
-                        >
-                          Facebook
-                        </a>
-                      )}
-                      {selectedAdmin.website && (
-                        <a
-                          href={selectedAdmin.website}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block bg-purple-800 hover:bg-purple-700 px-3 py-2 rounded text-center"
-                        >
-                          Website
-                        </a>
-                      )}
+                      <div className="flex flex-col md:flex-row gap-2 mt-2">
+                        {selectedAdmin.fb_main && (
+                          <a
+                            href={selectedAdmin.fb_main}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 bg-blue-800 hover:bg-blue-700 px-3 py-2 rounded text-center text-sm md:text-base"
+                          >
+                            Facebook
+                          </a>
+                        )}
+                        {selectedAdmin.website && (
+                          <a
+                            href={selectedAdmin.website}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex-1 bg-purple-800 hover:bg-purple-700 px-3 py-2 rounded text-center text-sm md:text-base"
+                          >
+                            Website
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
 
@@ -341,14 +349,14 @@ const InsuranceFund = () => {
                   {selectedAdmin.services &&
                     selectedAdmin.services.length > 0 && (
                       <div>
-                        <h4 className="font-bold mb-2 text-green-400">
+                        <h4 className="font-bold mb-1 md:mb-2 text-green-400 text-sm md:text-base">
                           DỊCH VỤ CUNG CẤP
                         </h4>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="flex flex-wrap gap-1 md:gap-2">
                           {selectedAdmin.services.map((service, index) => (
                             <span
                               key={index}
-                              className="bg-blue-900 text-blue-300 px-3 py-1 rounded text-sm"
+                              className="bg-blue-900 text-blue-300 px-2 py-1 rounded text-xs md:text-sm"
                             >
                               {service}
                             </span>
@@ -357,28 +365,28 @@ const InsuranceFund = () => {
                       </div>
                     )}
 
-                  {/* Tài khoản ngân hàng */}
+                  {/* Tài khoản ngân hàng - Tối ưu cho mobile */}
                   {selectedAdmin.bank_accounts &&
                     selectedAdmin.bank_accounts.length > 0 && (
                       <div>
-                        <h4 className="font-bold mb-2 text-green-400">
+                        <h4 className="font-bold mb-1 md:mb-2 text-green-400 text-sm md:text-base">
                           TÀI KHOẢN NGÂN HÀNG
                         </h4>
                         <div className="space-y-2">
                           {selectedAdmin.bank_accounts.map((account, index) => (
                             <div
                               key={index}
-                              className="bg-gray-900 p-3 rounded"
+                              className="bg-gray-900 p-2 md:p-3 rounded"
                             >
-                              <div className="flex justify-between items-center mb-1">
-                                <span className="font-bold">
+                              <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-1">
+                                <span className="font-bold text-sm md:text-base truncate">
                                   {account.bank}
                                 </span>
-                                <span className="text-green-400 font-mono">
+                                <span className="text-green-400 font-mono text-sm md:text-base break-all">
                                   {account.account_number}
                                 </span>
                               </div>
-                              <div className="text-sm text-gray-300">
+                              <div className="text-xs md:text-sm text-gray-300 truncate">
                                 Chủ TK: {account.account_name}
                               </div>
                             </div>
@@ -389,10 +397,11 @@ const InsuranceFund = () => {
                 </div>
               </div>
 
-              <div className="mt-6 text-center">
+              {/* Nút đóng ở dưới cùng */}
+              <div className="mt-4 md:mt-6 text-center">
                 <button
                   onClick={() => setSelectedAdmin(null)}
-                  className="px-6 py-2 bg-blue-700 border border-blue-500 rounded hover:bg-blue-600"
+                  className="w-full md:w-auto px-6 py-2 bg-blue-700 border border-blue-500 rounded hover:bg-blue-600 text-sm md:text-base"
                 >
                   ĐÓNG
                 </button>
