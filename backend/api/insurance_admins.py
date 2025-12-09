@@ -4,7 +4,6 @@ from typing import List, Optional
 from datetime import datetime
 
 from core.database import get_session
-from core.facebook_utils import normalize_facebook_link  # ← THÊM IMPORT
 from models.models import InsuranceAdmin
 from schemas.schemas import (
     InsuranceAdminCreate,
@@ -16,7 +15,7 @@ router = APIRouter()
 
 
 @router.post("/", response_model=InsuranceAdminResponse, status_code=201)
-async def create_insurance_admin(  # ← ĐỔI THÀNH async
+def create_insurance_admin(
     admin: InsuranceAdminCreate,
     db: Session = Depends(get_session)
 ):
@@ -34,10 +33,6 @@ async def create_insurance_admin(  # ← ĐỔI THÀNH async
             detail=f"Số thứ tự {admin.order_number} đã tồn tại"
         )
     
-    # ← NORMALIZE FACEBOOK LINKS
-    fb_main = await normalize_facebook_link(admin.fb_main)
-    fb_backup = await normalize_facebook_link(admin.fb_backup)
-    
     # Chuyển đổi bank_accounts từ Pydantic models sang dict
     bank_accounts_dict = [acc.dict() for acc in admin.bank_accounts]
     
@@ -46,8 +41,8 @@ async def create_insurance_admin(  # ← ĐỔI THÀNH async
         order_number=admin.order_number,
         full_name=admin.full_name,
         avatar_url=admin.avatar_url,
-        fb_main=fb_main,  # ← DÙNG LINK ĐÃ CHUẨN HÓA
-        fb_backup=fb_backup,  # ← DÙNG LINK ĐÃ CHUẨN HÓA
+        fb_main=admin.fb_main,
+        fb_backup=admin.fb_backup,
         zalo=admin.zalo,
         phone=admin.phone,
         website=admin.website,
@@ -118,7 +113,7 @@ def get_insurance_admin_by_order(
 
 
 @router.put("/{admin_id}", response_model=InsuranceAdminResponse)
-async def update_insurance_admin(  # ← ĐỔI THÀNH async
+def update_insurance_admin(
     admin_id: int,
     admin_update: InsuranceAdminUpdate,
     db: Session = Depends(get_session)
@@ -133,15 +128,9 @@ async def update_insurance_admin(  # ← ĐỔI THÀNH async
     # Cập nhật các trường nếu có giá trị mới
     update_data = admin_update.dict(exclude_unset=True)
     
-    # ← NORMALIZE FACEBOOK LINKS NẾU CÓ TRONG UPDATE
-    if "fb_main" in update_data and update_data["fb_main"]:
-        update_data["fb_main"] = await normalize_facebook_link(update_data["fb_main"])
-    
-    if "fb_backup" in update_data and update_data["fb_backup"]:
-        update_data["fb_backup"] = await normalize_facebook_link(update_data["fb_backup"])
-    
     # Xử lý riêng bank_accounts
     if "bank_accounts" in update_data and update_data["bank_accounts"]:
+        # update_data["bank_accounts"] = [acc.dict() for acc in update_data["bank_accounts"]]
         if hasattr(update_data["bank_accounts"][0], 'dict'):
             # Là Pydantic model, convert sang dict
             update_data["bank_accounts"] = [acc.dict() for acc in update_data["bank_accounts"]]

@@ -4,7 +4,6 @@ from typing import List, Dict, Any
 from datetime import datetime, timedelta
 
 from core.database import get_session
-from core.facebook_utils import normalize_facebook_link, is_facebook_link  # ← THÊM IMPORT
 from models.models import (
     AccountScamReport,
     WebsiteScamReport,
@@ -18,7 +17,7 @@ router = APIRouter()
 
 
 @router.get("/", response_model=SearchResult)
-async def search_reports(  # ← ĐỔI THÀNH async
+def search_reports(
     q: str = Query(..., min_length=1, description="Từ khóa tìm kiếm"),
     request: Request = None,
     db: Session = Depends(get_session)
@@ -29,20 +28,17 @@ async def search_reports(  # ← ĐỔI THÀNH async
     """
     search_query = q.strip()
     
-    # ← NORMALIZE NẾU LÀ FACEBOOK LINK
-    normalized_query = await normalize_facebook_link(search_query)
-    
     # Tìm kiếm trong AccountScamReport
     account_query = (
         select(AccountScamReport)
         .where(AccountScamReport.status == ReportStatus.APPROVED)
         .where(
             or_(
-                AccountScamReport.account_number.contains(normalized_query),
+                AccountScamReport.account_number.contains(search_query),
                 AccountScamReport.account_name.contains(search_query),
                 AccountScamReport.bank_name.contains(search_query),
-                AccountScamReport.facebook_link.contains(normalized_query),  # ← DÙNG NORMALIZED
-                AccountScamReport.zalo_link.contains(normalized_query),  # ← DÙNG NORMALIZED
+                AccountScamReport.facebook_link.contains(search_query),
+                AccountScamReport.zalo_link.contains(search_query),
                 AccountScamReport.phone_number.contains(search_query)
             )
         )
@@ -213,26 +209,23 @@ def get_reports_today(
 
 
 @router.get("/check/{identifier}")
-async def quick_check_scam(  # ← ĐỔI THÀNH async
+def quick_check_scam(
     identifier: str,
     db: Session = Depends(get_session)
 ) -> Dict[str, Any]:
     """
     KIỂM TRA NHANH: STK/SĐT/Link FB/Link Zalo có trong danh sách scam không
     """
-    # ← NORMALIZE NẾU LÀ FACEBOOK LINK
-    normalized_identifier = await normalize_facebook_link(identifier)
-    
     # Tìm tất cả báo cáo phù hợp
     reports = db.exec(
         select(AccountScamReport)
         .where(AccountScamReport.status == ReportStatus.APPROVED)
         .where(
             or_(
-                AccountScamReport.account_number == normalized_identifier,
+                AccountScamReport.account_number == identifier,
                 AccountScamReport.phone_number == identifier,
-                AccountScamReport.facebook_link.contains(normalized_identifier),  # ← DÙNG NORMALIZED
-                AccountScamReport.zalo_link.contains(normalized_identifier)  # ← DÙNG NORMALIZED
+                AccountScamReport.facebook_link.contains(identifier),
+                AccountScamReport.zalo_link.contains(identifier)
             )
         )
         .order_by(AccountScamReport.created_at.desc())
@@ -272,7 +265,7 @@ async def quick_check_scam(  # ← ĐỔI THÀNH async
 
 
 @router.get("/admin/find", response_model=List[InsuranceAdminResponse])
-async def search_insurance_admin(  # ← ĐỔI THÀNH async
+def search_insurance_admin(
     q: str = Query(..., min_length=1, description="Tìm admin: SĐT/STK/Zalo/FB"),
     db: Session = Depends(get_session)
 ):
@@ -280,9 +273,6 @@ async def search_insurance_admin(  # ← ĐỔI THÀNH async
     TÌM KIẾM ADMIN QUỸ BẢO HIỂM theo SĐT, STK, Zalo, Facebook
     """
     search_query = q.strip()
-    
-    # ← NORMALIZE NẾU LÀ FACEBOOK LINK
-    normalized_query = await normalize_facebook_link(search_query)
     
     # Tìm theo phone, zalo, fb_main
     query = (
@@ -292,8 +282,8 @@ async def search_insurance_admin(  # ← ĐỔI THÀNH async
             or_(
                 InsuranceAdmin.phone.contains(search_query),
                 InsuranceAdmin.zalo.contains(search_query),
-                InsuranceAdmin.fb_main.contains(normalized_query),  # ← DÙNG NORMALIZED
-                InsuranceAdmin.fb_backup.contains(normalized_query),  # ← DÙNG NORMALIZED
+                InsuranceAdmin.fb_main.contains(search_query),
+                InsuranceAdmin.fb_backup.contains(search_query),
                 InsuranceAdmin.full_name.contains(search_query)
             )
         )
