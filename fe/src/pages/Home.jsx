@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { api } from "../services/api";
 import Loading from "../components/Loading";
-
+import anhlogo from "../images/anhtrongsuotanhtrongsuot.png";
 const Home = () => {
   const [stats, setStats] = useState(null);
   const [topScammers, setTopScammers] = useState([]);
@@ -253,9 +253,14 @@ const Home = () => {
     <div className="space-y-8">
       {/* Hero Section */}
       <div className="text-center py-8 scan-line relative">
-        <h1 className="text-5xl font-bold mb-4 typewriter glow-green">
-          CHECKGDTG<span className="blink"></span>
-        </h1>
+        <div className="flex justify-center items-center mb-4">
+          <img
+            src={anhlogo}
+            alt="CHECKGDTG Logo"
+            className="h-48 md:h-60 lg:h-72 object-contain animate-slide-in"
+            style={{ mixBlendMode: "screen" }}
+          />
+        </div>
         <p className="text-xl text-green-300 mb-6">
           HỆ THỐNG CHỐNG LỪA ĐẢO - BẢO VỆ CỘNG ĐỒNG
         </p>

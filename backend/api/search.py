@@ -16,6 +16,40 @@ from schemas.schemas import SearchResult, InsuranceAdminResponse
 router = APIRouter()
 
 
+def normalize_fb_link(link: str) -> str:
+    """
+    Chuẩn hóa link Facebook cho tìm kiếm:
+    - Bỏ các ký tự #, ? và mọi thứ sau chúng
+    - Loại bỏ khoảng trắng thừa
+    """
+    if not link:
+        return link
+    
+    link = link.strip()
+    
+    # Cắt bỏ phần sau dấu # hoặc ?
+    if '#' in link:
+        link = link.split('#')[0]
+    if '?' in link and 'profile.php?id=' not in link:
+        # Giữ lại profile.php?id= nhưng bỏ params khác
+        if 'profile.php?id=' in link:
+            # Tách phần id
+            parts = link.split('?id=')
+            if len(parts) > 1:
+                id_part = parts[1].split('&')[0].split('#')[0]
+                link = f"{parts[0]}?id={id_part}"
+        else:
+            link = link.split('?')[0]
+    
+    return link.strip()
+
+
+def is_facebook_link(text: str) -> bool:
+    """Kiểm tra xem text có phải link Facebook không"""
+    text_lower = text.lower()
+    return 'facebook.com' in text_lower or 'fb.com' in text_lower or 'fb.me' in text_lower
+
+
 @router.get("/", response_model=SearchResult)
 def search_reports(
     q: str = Query(..., min_length=1, description="Từ khóa tìm kiếm"),
@@ -271,36 +305,56 @@ def search_insurance_admin(
 ):
     """
     TÌM KIẾM ADMIN QUỸ BẢO HIỂM theo SĐT, STK, Zalo, Facebook
+    Hỗ trợ tìm kiếm link Facebook (chuẩn hóa và so khớp partial)
     """
     search_query = q.strip()
     
-    # Tìm theo phone, zalo, fb_main
-    query = (
-        select(InsuranceAdmin)
-        .where(InsuranceAdmin.is_active == True)
-        .where(
-            or_(
-                InsuranceAdmin.phone.contains(search_query),
-                InsuranceAdmin.zalo.contains(search_query),
-                InsuranceAdmin.fb_main.contains(search_query),
-                InsuranceAdmin.fb_backup.contains(search_query),
-                InsuranceAdmin.full_name.contains(search_query)
-            )
-        )
-    )
+    # Kiểm tra nếu là link Facebook thì chuẩn hóa
+    is_fb_link = is_facebook_link(search_query)
+    if is_fb_link:
+        search_query = normalize_fb_link(search_query)
     
-    admins = db.exec(query).all()
+    # Lấy tất cả admin đang hoạt động
+    all_admins = db.exec(
+        select(InsuranceAdmin).where(InsuranceAdmin.is_active == True)
+    ).all()
     
-    # Tìm theo số tài khoản ngân hàng (trong JSON)
-    if not admins:
-        all_admins = db.exec(
-            select(InsuranceAdmin).where(InsuranceAdmin.is_active == True)
-        ).all()
+    matched_admins = []
+    
+    for admin in all_admins:
+        # Kiểm tra các trường thông thường
+        if (search_query in (admin.phone or '') or
+            search_query in (admin.zalo or '') or
+            search_query in (admin.full_name or '')):
+            matched_admins.append(admin)
+            continue
         
-        for admin in all_admins:
-            for bank_acc in admin.bank_accounts:
-                if search_query in bank_acc.get("account_number", ""):
-                    admins.append(admin)
-                    break
+        # Kiểm tra Facebook link với chuẩn hóa
+        if is_fb_link:
+            # Chuẩn hóa link trong DB
+            admin_fb_main = normalize_fb_link(admin.fb_main) if admin.fb_main else ''
+            admin_fb_backup = normalize_fb_link(admin.fb_backup) if admin.fb_backup else ''
+            
+            # So khớp partial (search_query có trong admin link hoặc ngược lại)
+            if (search_query and admin_fb_main and 
+                (search_query in admin_fb_main or admin_fb_main in search_query)):
+                matched_admins.append(admin)
+                continue
+            
+            if (search_query and admin_fb_backup and 
+                (search_query in admin_fb_backup or admin_fb_backup in search_query)):
+                matched_admins.append(admin)
+                continue
+        else:
+            # Tìm kiếm bình thường trong link
+            if search_query in (admin.fb_main or '') or search_query in (admin.fb_backup or ''):
+                matched_admins.append(admin)
+                continue
+        
+        # Tìm theo số tài khoản ngân hàng
+        for bank_acc in admin.bank_accounts:
+            if search_query in bank_acc.get("account_number", ""):
+                matched_admins.append(admin)
+                break
     
-    return admins
+    return matched_admins

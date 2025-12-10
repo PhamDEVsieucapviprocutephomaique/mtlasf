@@ -1802,20 +1802,15 @@ const AdminPanel = () => {
                       key={index}
                       className="grid grid-cols-1 md:grid-cols-4 gap-2 mb-2"
                     >
-                      <select
+                      <input
+                        type="text"
+                        placeholder="Tên ngân hàng"
                         value={account.bank}
                         onChange={(e) =>
                           handleBankAccountChange(index, "bank", e.target.value)
                         }
                         className="bg-black border border-green-600 text-green-400 px-3 py-2 rounded"
-                      >
-                        <option value="">Chọn ngân hàng</option>
-                        {bankList.map((bank) => (
-                          <option key={bank} value={bank}>
-                            {bank}
-                          </option>
-                        ))}
-                      </select>
+                      />
                       <input
                         type="text"
                         placeholder="Số tài khoản"

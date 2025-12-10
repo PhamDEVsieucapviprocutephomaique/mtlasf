@@ -29,7 +29,9 @@ function App() {
                 <Route path="/search" element={<Search />} />
                 <Route path="/report" element={<Report />} />
                 <Route path="/scam-list" element={<ScamList />} />
-                <Route path="/insurance-fund" element={<InsuranceFund />} />
+                <Route path="/admin" element={<InsuranceFund />} />
+                {/* THÊM ROUTE NÀY */}
+                <Route path="/admin/:adminId" element={<InsuranceFund />} />
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/adminsetting" element={<AdminPanel />} />
               </Routes>

@@ -3,6 +3,7 @@ import { Link, useLocation } from "react-router-dom";
 import imageslogo from "../images/4d507a03dc5c53020a4d.jpg";
 const Header = ({ theme, setTheme }) => {
   const [showTerminal, setShowTerminal] = useState(false);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [terminalInput, setTerminalInput] = useState("");
   const [terminalOutput, setTerminalOutput] = useState([
     "CHECK GDTG TERMINAL v1.0.0",
@@ -16,7 +17,6 @@ const Header = ({ theme, setTheme }) => {
   });
   const location = useLocation();
 
-  // Fetch system settings khi component mount
   useEffect(() => {
     fetchSystemSettings();
   }, []);
@@ -43,14 +43,8 @@ const Header = ({ theme, setTheme }) => {
     { path: "/search", label: "TÌM KIẾM" },
     { path: "/scam-list", label: "DANH SÁCH SCAM" },
     { path: "/report", label: "TỐ CÁO" },
-    { path: "/insurance-fund", label: "QUỸ BẢO HIỂM" },
+    { path: "/admin", label: "QUỸ BẢO HIỂM" },
     { path: "/dashboard", label: "THỐNG KÊ" },
-  ];
-
-  const themes = [
-    { id: "hacker", label: "CLASSIC", color: "text-green-400" },
-    { id: "matrix", label: "MATRIX", color: "text-green-300" },
-    { id: "cyberpunk", label: "CYBERPUNK", color: "text-purple-400" },
   ];
 
   const handleTerminalSubmit = async (e) => {
@@ -120,106 +114,205 @@ Trạng thái: ${admin.is_active ? "ĐANG HOẠT ĐỘNG" : "NGỪNG HOẠT Đ�
     <>
       <header className="sticky top-0 z-50 bg-black bg-opacity-90 backdrop-blur-sm border-b border-green-600">
         <div className="container mx-auto px-4 py-3">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
+          {/* MOBILE VIEW - Chỉ hiển thị logo + tên + hamburger menu */}
+          <div className="md:hidden flex items-center justify-between">
             <Link to="/" className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center">
+              <div className="w-28 h-28 rounded-lg overflow-hidden flex items-center justify-center bg-black border-2 border-green-600">
                 <img
                   src={imageslogo}
                   alt="CHECKGDTG Logo"
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-contain p-2"
+                  style={{ mixBlendMode: "screen" }}
                 />
               </div>
               <div>
-                <h1 className="text-2xl font-bold glow-green">
+                <h1 className="text-lg font-bold glow-green">
                   CHECKGDTG<span className="blink"></span>
                 </h1>
                 <p className="text-xs text-green-300">HỆ THỐNG CHỐNG LỪA ĐẢO</p>
               </div>
             </Link>
 
-            <nav className="flex flex-wrap justify-center gap-2">
-              {navItems.map((item) => (
-                <Link
-                  key={item.path}
-                  to={item.path}
-                  className={`px-3 py-2 rounded-lg border transition-all ${
-                    location.pathname === item.path
-                      ? "bg-green-900 border-green-500 text-white"
-                      : "border-green-800 hover:bg-green-900 hover:border-green-500"
+            {/* Hamburger Menu Button */}
+            <button
+              onClick={() => setShowMobileMenu(!showMobileMenu)}
+              className="p-2 border border-green-600 rounded-lg hover:bg-green-900 transition-all"
+            >
+              <div className="space-y-1.5">
+                <div
+                  className={`w-6 h-0.5 bg-green-400 transition-all ${
+                    showMobileMenu ? "rotate-45 translate-y-2" : ""
                   }`}
-                >
-                  <span className="text-sm font-bold">{item.label}</span>
-                </Link>
-              ))}
-            </nav>
-
-            <div className="flex items-center space-x-4">
-              {/* <div className="flex items-center space-x-2">
-                <span className="text-sm">THEME:</span>
-                <select
-                  value={theme}
-                  onChange={(e) => setTheme(e.target.value)}
-                  className="bg-black border border-green-600 text-green-400 px-2 py-1 rounded text-sm"
-                >
-                  {themes.map((t) => (
-                    <option key={t.id} value={t.id} className={t.color}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-              </div> */}
-
-              <button
-                onClick={() => setShowTerminal(!showTerminal)}
-                className="px-4 py-2 bg-green-900 border border-green-500 rounded-lg hover:bg-green-800 transition-all flex items-center"
-              >
-                <span className="font-bold">TERMINAL</span>
-              </button>
-            </div>
+                ></div>
+                <div
+                  className={`w-6 h-0.5 bg-green-400 transition-all ${
+                    showMobileMenu ? "opacity-0" : ""
+                  }`}
+                ></div>
+                <div
+                  className={`w-6 h-0.5 bg-green-400 transition-all ${
+                    showMobileMenu ? "-rotate-45 -translate-y-2" : ""
+                  }`}
+                ></div>
+              </div>
+            </button>
           </div>
 
-          <div className="mt-3 flex flex-wrap items-center justify-between text-xs">
-            {/* THAY THẾ PHẦN NÀY BẰNG FACEBOOK & TELEGRAM LINKS */}
-            <div className="flex items-center space-x-4">
-              <a
-                href={systemSettings.facebook_group}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center hover:text-green-400 transition-colors"
-              >
-                <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
-                <span>FACEBOOK GROUP</span>
-              </a>
+          {/* DESKTOP VIEW - Full header như cũ */}
+          <div className="hidden md:flex flex-col space-y-4">
+            <div className="flex justify-between items-center">
+              <Link to="/" className="flex items-center space-x-4">
+                <div className="w-32 h-32 rounded-xl overflow-hidden flex items-center justify-center bg-black border-2 border-green-600 shadow-2xl shadow-green-500/30">
+                  <img
+                    src={imageslogo}
+                    alt="CHECKGDTG Logo"
+                    className="w-full h-full object-contain p-2"
+                    style={{ mixBlendMode: "screen" }}
+                  />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold glow-green">
+                    CHECKGDTG<span className="blink"></span>
+                  </h1>
+                  <p className="text-xs text-green-300">
+                    HỆ THỐNG CHỐNG LỪA ĐẢO
+                  </p>
+                </div>
+              </Link>
 
-              <a
-                href="https://t.me/CHECKGDTGBOT"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-4 py-2 bg-blue-600 border border-blue-500 rounded-lg hover:bg-blue-700 transition-all font-bold flex items-center"
-              >
-                🤖 TELEGRAM BOT
-              </a>
-              <a
-                href={systemSettings.telegram_link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center hover:text-green-400 transition-colors"
-              >
-                <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
-                <span>TELEGRAM</span>
-              </a>
-              {/* Giữ lại phần hiển thị trạng thái hệ thống nhưng chuyển sang bên phải */}
-              <div className="hidden md:flex items-center">
-                <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+              <nav className="flex flex-wrap justify-center gap-2">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    className={`px-3 py-2 rounded-lg border transition-all ${
+                      location.pathname === item.path
+                        ? "bg-green-900 border-green-500 text-white"
+                        : "border-green-800 hover:bg-green-900 hover:border-green-500"
+                    }`}
+                  >
+                    <span className="text-sm font-bold">{item.label}</span>
+                  </Link>
+                ))}
+              </nav>
+
+              <div className="flex items-center space-x-4">
+                <button
+                  onClick={() => setShowTerminal(!showTerminal)}
+                  className="px-4 py-2 bg-green-900 border border-green-500 rounded-lg hover:bg-green-800 transition-all flex items-center"
+                >
+                  <span className="font-bold">TERMINAL</span>
+                </button>
               </div>
             </div>
 
-            {/* Phần bên phải - Hiển thị thông tin IP và API status */}
-            <div className="text-green-300 flex items-center space-x-4"></div>
+            <div className="flex flex-wrap items-center justify-between text-xs">
+              <div className="flex items-center space-x-4">
+                <a
+                  href={systemSettings.facebook_group}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center hover:text-green-400 transition-colors"
+                >
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
+                  <span>FACEBOOK GROUP</span>
+                </a>
+
+                <a
+                  href="https://t.me/CHECKGDTGBOT"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 bg-blue-600 border border-blue-500 rounded-lg hover:bg-blue-700 transition-all font-bold flex items-center"
+                >
+                  🤖 TELEGRAM BOT
+                </a>
+
+                <a
+                  href={systemSettings.telegram_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center hover:text-green-400 transition-colors"
+                >
+                  <div className="w-2 h-2 bg-blue-400 rounded-full mr-2"></div>
+                  <span>TELEGRAM</span>
+                </a>
+
+                <div className="flex items-center">
+                  <div className="w-2 h-2 bg-green-500 rounded-full mr-2 animate-pulse"></div>
+                </div>
+              </div>
+            </div>
           </div>
+
+          {/* MOBILE MENU DROPDOWN */}
+          {showMobileMenu && (
+            <div className="md:hidden mt-4 space-y-3 animate-slide-down">
+              {/* Navigation Links */}
+              <nav className="flex flex-col space-y-2">
+                {navItems.map((item) => (
+                  <Link
+                    key={item.path}
+                    to={item.path}
+                    onClick={() => setShowMobileMenu(false)}
+                    className={`px-4 py-3 rounded-lg border transition-all ${
+                      location.pathname === item.path
+                        ? "bg-green-900 border-green-500 text-white"
+                        : "border-green-800 hover:bg-green-900 hover:border-green-500"
+                    }`}
+                  >
+                    <span className="text-sm font-bold">{item.label}</span>
+                  </Link>
+                ))}
+              </nav>
+
+              {/* Terminal Button */}
+              <button
+                onClick={() => {
+                  setShowTerminal(true);
+                  setShowMobileMenu(false);
+                }}
+                className="w-full px-4 py-3 bg-green-900 border border-green-500 rounded-lg hover:bg-green-800 transition-all"
+              >
+                <span className="font-bold">TERMINAL</span>
+              </button>
+
+              {/* Social Links */}
+              <div className="flex flex-col space-y-2 pt-3 border-t border-green-800">
+                <a
+                  href={systemSettings.facebook_group}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center px-4 py-2 hover:bg-green-900 rounded-lg transition-all"
+                >
+                  <div className="w-2 h-2 bg-blue-500 rounded-full mr-3"></div>
+                  <span className="text-sm">FACEBOOK GROUP</span>
+                </a>
+
+                <a
+                  href="https://t.me/CHECKGDTGBOT"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-4 py-2 bg-blue-600 border border-blue-500 rounded-lg hover:bg-blue-700 transition-all font-bold text-sm"
+                >
+                  🤖 TELEGRAM BOT
+                </a>
+
+                <a
+                  href={systemSettings.telegram_link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center px-4 py-2 hover:bg-green-900 rounded-lg transition-all"
+                >
+                  <div className="w-2 h-2 bg-blue-400 rounded-full mr-3"></div>
+                  <span className="text-sm">TELEGRAM</span>
+                </a>
+              </div>
+            </div>
+          )}
         </div>
       </header>
 
+      {/* TERMINAL MODAL */}
       {showTerminal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -232,7 +325,9 @@ Trạng thái: ${admin.is_active ? "ĐANG HOẠT ĐỘNG" : "NGỪNG HOẠT Đ�
                 <div className="w-3 h-3 rounded-full bg-red-500 mr-2"></div>
                 <div className="w-3 h-3 rounded-full bg-yellow-500 mr-2"></div>
                 <div className="w-3 h-3 rounded-full bg-green-500 mr-2"></div>
-                <span className="ml-2 font-bold">check_gdtg@terminal:~</span>
+                <span className="ml-2 font-bold text-sm md:text-base">
+                  check_gdtg@terminal:~
+                </span>
               </div>
               <button
                 onClick={() => setShowTerminal(false)}
@@ -243,7 +338,7 @@ Trạng thái: ${admin.is_active ? "ĐANG HOẠT ĐỘNG" : "NGỪNG HOẠT Đ�
             </div>
 
             <div className="p-4">
-              <div className="h-96 overflow-y-auto bg-black text-green-400 font-mono text-sm p-4 rounded border border-green-800 mb-4">
+              <div className="h-64 md:h-96 overflow-y-auto bg-black text-green-400 font-mono text-xs md:text-sm p-4 rounded border border-green-800 mb-4">
                 {terminalOutput.map((line, index) => (
                   <div key={index} className="mb-1 whitespace-pre-wrap">
                     {line}
@@ -261,14 +356,17 @@ Trạng thái: ${admin.is_active ? "ĐANG HOẠT ĐỘNG" : "NGỪNG HOẠT Đ�
                 </div>
               </div>
 
-              <form onSubmit={handleTerminalSubmit} className="flex">
+              <form
+                onSubmit={handleTerminalSubmit}
+                className="flex flex-col md:flex-row gap-2"
+              >
                 <div className="flex-1 flex items-center bg-black border border-green-600 rounded px-3 py-2">
                   <span className="text-green-500 mr-2">$</span>
                   <input
                     type="text"
                     value={terminalInput}
                     onChange={(e) => setTerminalInput(e.target.value)}
-                    className="flex-1 bg-transparent outline-none text-green-400"
+                    className="flex-1 bg-transparent outline-none text-green-400 text-sm"
                     placeholder="Nhập STK/SĐT/Facebook/Zalo..."
                     autoFocus
                     disabled={loading}
@@ -277,7 +375,7 @@ Trạng thái: ${admin.is_active ? "ĐANG HOẠT ĐỘNG" : "NGỪNG HOẠT Đ�
                 <button
                   type="submit"
                   disabled={loading}
-                  className="ml-2 px-4 py-2 bg-green-700 border border-green-500 rounded hover:bg-green-600 disabled:opacity-50"
+                  className="px-4 py-2 bg-green-700 border border-green-500 rounded hover:bg-green-600 disabled:opacity-50"
                 >
                   TÌM KIẾM
                 </button>
@@ -286,13 +384,13 @@ Trạng thái: ${admin.is_active ? "ĐANG HOẠT ĐỘNG" : "NGỪNG HOẠT Đ�
               <div className="mt-4 grid grid-cols-2 gap-2">
                 <button
                   onClick={handleClear}
-                  className="px-3 py-1 bg-green-900 bg-opacity-30 border border-green-700 rounded text-xs hover:bg-green-800"
+                  className="px-3 py-2 bg-green-900 bg-opacity-30 border border-green-700 rounded text-xs hover:bg-green-800"
                 >
                   CLEAR
                 </button>
                 <button
                   onClick={() => setShowTerminal(false)}
-                  className="px-3 py-1 bg-green-900 bg-opacity-30 border border-green-700 rounded text-xs hover:bg-green-800"
+                  className="px-3 py-2 bg-green-900 bg-opacity-30 border border-green-700 rounded text-xs hover:bg-green-800"
                 >
                   EXIT
                 </button>
@@ -301,6 +399,33 @@ Trạng thái: ${admin.is_active ? "ĐANG HOẠT ĐỘNG" : "NGỪNG HOẠT Đ�
           </div>
         </div>
       )}
+
+      <style>{`
+        .glow-green {
+          text-shadow: 0 0 5px #00ff00, 0 0 10px #00ff00;
+        }
+        .blink::after {
+          content: '|';
+          animation: blink 1s infinite;
+        }
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+        @keyframes slide-down {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        .animate-slide-down {
+          animation: slide-down 0.3s ease-out;
+        }
+      `}</style>
     </>
   );
 };
